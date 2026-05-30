@@ -44,9 +44,36 @@ done
 echo "  ✅ ${mm_installed} 安装, ${mm_skipped} 跳过 (--force 覆盖)"
 echo ""
 
-# ---- 2. agent-browser Skill + CLI + Chrome ----
-echo "🔧 [2/3] agent-browser 浏览器自动化..."
-echo ""
+# 动态查找 Chrome 可执行文件路径
+find_chrome() {
+    for candidate in \
+        "${HOME}/.agent-browser/chrome-install/opt/google/chrome/google-chrome" \
+        "${HOME}/.agent-browser/browsers/"*/opt/google/chrome/google-chrome \
+        /usr/bin/google-chrome-stable \
+        /usr/bin/google-chrome \
+        /usr/bin/chromium-browser \
+        /usr/bin/chromium; do
+        if [ -f "$candidate" ]; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# 写入 env var 到 .bashrc（使用 $HOME 变量保持可移植）
+write_env_var() {
+    local chrome_path="$1"
+    # 将 /home/user/... 替换为 $HOME/... 再写入
+    local portable_path="\$HOME/${chrome_path#${HOME}/}"
+    export AGENT_BROWSER_EXECUTABLE_PATH="$chrome_path"
+    if ! grep -q "AGENT_BROWSER_EXECUTABLE_PATH" "${HOME}/.bashrc" 2>/dev/null; then
+        echo "" >> "${HOME}/.bashrc"
+        echo "# agent-browser Chrome 路径" >> "${HOME}/.bashrc"
+        echo "export AGENT_BROWSER_EXECUTABLE_PATH=\"${portable_path}\"" >> "${HOME}/.bashrc"
+        echo "  💡 已将 Chrome 路径写入 ~/.bashrc（source ~/.bashrc 生效）"
+    fi
+}
 
 # 2a. 安装 Skill 文件
 mkdir -p "${AGENTS_DIR}/agent-browser"
@@ -85,20 +112,19 @@ if [ "$HAS_CLI" = true ]; then
     if [ "$CHROME_OK" = true ]; then
         echo "  🌐 Chrome: ✅ 可用"
     else
-        # 尝试用 env var
-        CHROME_CUSTOM="${HOME}/.agent-browser/chrome-install/opt/google/chrome/google-chrome"
-        if [ -f "$CHROME_CUSTOM" ]; then
-            export AGENT_BROWSER_EXECUTABLE_PATH="$CHROME_CUSTOM"
+        # 尝试动态查找 Chrome 并设置 env var
+        CHROME_PATH=$(find_chrome)
+        if [ -n "$CHROME_PATH" ]; then
             if timeout 10 agent-browser open "about:blank" --no-sandbox 2>/dev/null; then
                 CHROME_OK=true
                 agent-browser close 2>/dev/null
-                echo "  🌐 Chrome: ✅ 可用 (自定义路径)"
-                # 持久化 env var
-                if ! grep -q "AGENT_BROWSER_EXECUTABLE_PATH" "${HOME}/.bashrc" 2>/dev/null; then
-                    echo "" >> "${HOME}/.bashrc"
-                    echo "# agent-browser Chrome 路径" >> "${HOME}/.bashrc"
-                    echo "export AGENT_BROWSER_EXECUTABLE_PATH=${CHROME_CUSTOM}" >> "${HOME}/.bashrc"
-                    echo "  💡 已将 Chrome 路径写入 ~/.bashrc，source ~/.bashrc 生效"
+                echo "  🌐 Chrome: ✅ 可用 ($CHROME_PATH)"
+            else
+                write_env_var "$CHROME_PATH"
+                if timeout 10 agent-browser open "about:blank" --no-sandbox 2>/dev/null; then
+                    CHROME_OK=true
+                    agent-browser close 2>/dev/null
+                    echo "  🌐 Chrome: ✅ 可用 (env var 已设置)"
                 fi
             fi
         fi
@@ -113,20 +139,16 @@ if [ "$HAS_CLI" = true ]; then
             echo "  ⏳ 正在下载 Chrome（约 300MB），请耐心等待..."
             if agent-browser install 2>&1; then
                 echo "  🌐 Chrome: ✅ 下载完成"
-                # 检查是否需要设置 env var
-                CHROME_CUSTOM="${HOME}/.agent-browser/chrome-install/opt/google/chrome/google-chrome"
-                if [ -f "$CHROME_CUSTOM" ] && ! grep -q "AGENT_BROWSER_EXECUTABLE_PATH" "${HOME}/.bashrc" 2>/dev/null; then
-                    export AGENT_BROWSER_EXECUTABLE_PATH="$CHROME_CUSTOM"
-                    echo "" >> "${HOME}/.bashrc"
-                    echo "# agent-browser Chrome 路径" >> "${HOME}/.bashrc"
-                    echo "export AGENT_BROWSER_EXECUTABLE_PATH=${CHROME_CUSTOM}" >> "${HOME}/.bashrc"
-                    echo "  💡 已将 Chrome 路径写入 ~/.bashrc"
+                CHROME_PATH=$(find_chrome)
+                if [ -n "$CHROME_PATH" ]; then
+                    write_env_var "$CHROME_PATH"
                 fi
             else
                 echo "  ⚠️  Chrome 下载失败，请手动运行: agent-browser install"
             fi
         else
             echo "  ⏭️  跳过 Chrome 下载（可稍后手动: agent-browser install）"
+            echo "     💡 手动下载后运行 agent-browser install，再执行此脚本即可自动配置"
         fi
     fi
 fi
