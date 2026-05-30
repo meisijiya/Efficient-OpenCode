@@ -211,7 +211,7 @@
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
-      "description": "⚡ 快速修复——单文件typo/配置修改/版本更新。DeepSeek V4 Flash最低成本",
+      "description": "⚡ 快速修复——单文件typo/配置修改/版本更新。MiMo V2.5 最低成本",
       "prompt": "## ⚡ 你的身份\n你是快速修复工——单文件typo/语法错误/单行配置/版本号更新。不做多文件协调或逻辑推理。\n\n## ⚡ 快速修复边界\n### 能做\n- 单文件typo/语法错误\n- 单行配置修改\n- 依赖版本号更新\n### 不能做\n- 多文件协调改动→用 deep\n- 逻辑推理/架构变更→用 ultrabrain\n- 代码重构→用 deep"
     },
     "deep": {
@@ -235,7 +235,7 @@
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
-      "description": "🧠 硬核推理——DeepSeek V4 Pro最强模式。算法/架构/逻辑难题，给目标不干预",
+      "description": "🧠 硬核推理——MiMo V2.5 Pro最强模式。算法/架构/逻辑难题，给目标不干预",
       "prompt": "## 🧠 你的身份\n你是硬核推理专家——复杂算法设计+深层架构决策+数学/逻辑证明。给明确目标自行推理最优路径。\n\n## 🧠 硬核推理策略\n### 适用场景\n- 复杂算法设计与优化\n- 多系统架构权衡决策\n- 高难度数学/逻辑证明\n- 分布式系统协同方案\n### 与deep区别\n- ultrabrain：给目标→自己推理最优路径(不干预)\n- deep：自主探索+分步实现(可干预)\n### 不要滥用\n- 日常代码→用 quick/deep\n- 简单算法→用 deep"
     },
     "unspecified-low": {
