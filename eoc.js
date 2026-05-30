@@ -1244,13 +1244,17 @@ function copyAuxiliaryConfigs(target) {
 async function checkAndInstallEasyVision() {
   if (!process.stdin.isTTY) return;
 
-  let installed = false;
-  try {
-    const r = execSync('npm list -g opencode-minimax-easy-vision', {
-      encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    if (r.includes('opencode-minimax-easy-vision')) installed = true;
-  } catch {}
+  // 检查 OpenCode 插件目录 或 npm 全局包
+  const evPluginDir = path.join(os.homedir(), '.config', 'opencode', 'plugins', 'opencode-minimax-easy-vision');
+  let installed = fs.existsSync(evPluginDir);
+  if (!installed) {
+    try {
+      const r = execSync('npm list -g opencode-minimax-easy-vision', {
+        encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      if (r.includes('opencode-minimax-easy-vision')) installed = true;
+    } catch {}
+  }
 
   if (!installed) {
     const answer = await new Promise((resolve) => {
@@ -1287,13 +1291,18 @@ function checkPluginsQuick() {
 
   const missing = [];
 
-  // 检查 EasyVision
-  try {
-    const r = execSync('npm list -g opencode-minimax-easy-vision', {
-      encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    if (!r.includes('opencode-minimax-easy-vision')) missing.push('EasyVision 图片拦截');
-  } catch { missing.push('EasyVision 图片拦截'); }
+  // 检查 EasyVision（OpenCode 插件目录 或 npm 全局包）
+  const evPluginDir = path.join(os.homedir(), '.config', 'opencode', 'plugins', 'opencode-minimax-easy-vision');
+  let evFound = fs.existsSync(evPluginDir);
+  if (!evFound) {
+    try {
+      const r = execSync('npm list -g opencode-minimax-easy-vision', {
+        encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      if (r.includes('opencode-minimax-easy-vision')) evFound = true;
+    } catch {}
+  }
+  if (!evFound) missing.push('EasyVision 图片拦截');
 
   if (missing.length > 0) {
     console.log(`\n${COLORS.yellow}⚠️  缺少关键插件: ${missing.join('、')}${COLORS.reset}`);
