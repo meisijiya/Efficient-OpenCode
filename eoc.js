@@ -1244,17 +1244,9 @@ function copyAuxiliaryConfigs(target) {
 async function checkAndInstallEasyVision() {
   if (!process.stdin.isTTY) return;
 
-  // 检查 OpenCode 插件目录 或 npm 全局包
+  // 检查 OpenCode 插件目录
   const evPluginDir = path.join(os.homedir(), '.config', 'opencode', 'plugins', 'opencode-minimax-easy-vision');
-  let installed = fs.existsSync(evPluginDir);
-  if (!installed) {
-    try {
-      const r = execSync('npm list -g opencode-minimax-easy-vision', {
-        encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'],
-      });
-      if (r.includes('opencode-minimax-easy-vision')) installed = true;
-    } catch {}
-  }
+  const installed = fs.existsSync(evPluginDir);
 
   if (!installed) {
     const answer = await new Promise((resolve) => {
@@ -1267,11 +1259,25 @@ async function checkAndInstallEasyVision() {
 
     if (answer === '' || answer === 'y') {
       console.log(`${c.info('⏳')} 正在安装 opencode-minimax-easy-vision…`);
+      let success = false;
+      // 方式一：opencode plugin 命令（官方推荐）
       try {
-        execSync('npm install -g opencode-minimax-easy-vision', { stdio: 'inherit' });
+        execSync('opencode plugin opencode-minimax-easy-vision --global', { stdio: 'inherit' });
+        success = true;
+      } catch {}
+      // 方式二：git clone 到插件目录（备用）
+      if (!success) {
+        try {
+          const pluginDir = path.join(os.homedir(), '.config', 'opencode', 'plugins');
+          fs.mkdirSync(pluginDir, { recursive: true });
+          execSync(`git clone https://github.com/devadathanmb/opencode-minimax-easy-vision.git "${evPluginDir}"`, { stdio: 'inherit' });
+          success = true;
+        } catch {}
+      }
+      if (success) {
         console.log(`${c.success('✅')} EasyVision 插件安装完成`);
-      } catch (err) {
-        console.log(`${c.warning('⚠')} EasyVision 安装失败，请手动安装: npm install -g opencode-minimax-easy-vision`);
+      } else {
+        console.log(`${c.warning('⚠')} 安装失败，请手动安装: opencode plugin opencode-minimax-easy-vision --global`);
       }
     } else {
       console.log(`${c.dim('ℹ')} 跳过 EasyVision 安装（可稍后手动安装）`);
