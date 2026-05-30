@@ -242,10 +242,18 @@ configure_solofast() {
 
     print_info "正在生成配置..."
 
-    sed "s|{{FAST_MODEL_ID}}|${FAST_MODEL}|g" "$template_file" > "$temp_file"
+    # 用 Python 替代 sed 避免分隔符冲突（如模型 ID 含 / & 等特殊字符）
+    python3 -c "
+import sys, json
+with open(sys.argv[1]) as f:
+    content = f.read()
+content = content.replace('{{FAST_MODEL_ID}}', sys.argv[2])
+json.loads(content)
+with open(sys.argv[3], 'w') as f:
+    f.write(content)
+" "$template_file" "$FAST_MODEL" "$temp_file"
 
-    # 验证生成的是合法 JSON
-    if ! python3 -m json.tool "$temp_file" > /dev/null 2>&1; then
+    if [ $? -ne 0 ]; then
         print_error "生成的配置 JSON 不合法，请检查模型 ID 是否包含特殊字符"
         rm -f "$temp_file"
         exit 1

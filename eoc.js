@@ -1020,7 +1020,8 @@ async function cmdInstall(target, engine, promptMode) {
 
   // ---- SoloFast 模式：只需输入 Fast 模型 ID（其余全部 MiniMax M2.7） ----
   if (engine === 'solofast') {
-    const sourceFile = getSourceFile(engine, promptMode);
+    // solofast 模板命名不遵循 oh-my-openagent-{engine}.json 模式，直接硬编码文件名
+    const sourceFile = 'ohmyopencode-solofast.json';
     const fastModel = await promptSolofastModel();
     if (!fastModel) {
       console.log(`${c.dim('已取消')}`);
