@@ -800,6 +800,8 @@ function showDetail(fp) {
   console.log(`${COLORS.cyan}║${COLORS.reset}  执行模型 (Exec):  ${fp.modelKeys.exec}`);
   console.log(`${COLORS.cyan}║${COLORS.reset}`);
   console.log(`${COLORS.cyan}║${COLORS.reset}  💡 ${fp.description}`);
+  console.log(`${COLORS.cyan}║${COLORS.reset}`);
+  console.log(`${COLORS.cyan}║${COLORS.reset}  ${COLORS.yellow}⚠️  请确认已在 OpenCode 中 /connect 连接以上模型${COLORS.reset}`);
   console.log(`${COLORS.cyan}╚══════════════════════════════════════════════════════╝${COLORS.reset}`);
   console.log('');
 }
@@ -937,6 +939,22 @@ async function cmdInstall(target, engine, promptMode) {
   console.log(`  ${c.cyan('📝')} 模式: ${promptMode === 'prompt' ? '覆盖模式 (prompt)' : '追加模式 (prompt_append)'}`);
   console.log('');
 
+  // 显示所选方案的模型 ID
+  console.log(`${COLORS.cyan}📋 所选方案模型分配：${COLORS.reset}`);
+  if (engine === 'deepseek') {
+    console.log(`  推理: opencode-go/deepseek-v4-pro`);
+    console.log(`  轻量: opencode-go/deepseek-v4-flash`);
+    console.log(`  执行: minimax-cn-coding-plan/MiniMax-M2.7`);
+  } else if (engine === 'mimo') {
+    console.log(`  推理: xiaomi-token-plan-cn/mimo-v2.5-pro`);
+    console.log(`  轻量: xiaomi-token-plan-cn/mimo-v2.5`);
+    console.log(`  执行: minimax-cn-coding-plan/MiniMax-M2.7`);
+  } else if (engine === 'minimax') {
+    console.log(`  全引擎: minimax-cn-coding-plan/MiniMax-M2.7`);
+  }
+  // template/template2 are handled separately with their own prompts
+  console.log(`${COLORS.yellow}  ⚠️  请确认已在 OpenCode 中 /connect 连接以上模型\n${COLORS.reset}`);
+
   // ---- 模板模式：输入模型 ID ----
   let templateContent = null;
   if (engine === 'template') {
@@ -1050,11 +1068,12 @@ function selectEngineInteractive() {
   return new Promise((resolve) => {
     const rl = createReadline();
     console.log(`${COLORS.cyan}请选择模型引擎方案：${COLORS.reset}\n`);
-    console.log(`  [M] MiMo + MiniMax      推理: MiMo V2.5 Pro | 执行: MiniMax M2.7 (推荐)`);
-    console.log(`  [D] DeepSeek + MiniMax  推理: DeepSeek V4 Pro | 执行: MiniMax M2.7`);
-    console.log(`  [N] 纯 MiniMax M2.7     全引擎: MiniMax M2.7（单模型方案）`);
-    console.log(`  [T] 自定义模板          四层模型：手动输入全部 4 个模型 ID`);
-    console.log(`  [2] 自定义模板 双引擎   双引擎：Pro/Fast 自定义 + Exec/Fallback 硬编码\n`);
+    console.log(`  [M] MiMo + MiniMax      推理: xiaomi-token-plan-cn/mimo-v2.5-pro | 执行: minimax-cn-coding-plan/MiniMax-M2.7 (推荐)`);
+    console.log(`  [D] DeepSeek + MiniMax  推理: opencode-go/deepseek-v4-pro | 执行: minimax-cn-coding-plan/MiniMax-M2.7`);
+    console.log(`  [N] 纯 MiniMax M2.7     全引擎: minimax-cn-coding-plan/MiniMax-M2.7（单模型方案）`);
+    console.log(`  [T] 自定义模板          需手动输入 Pro/Fast/Exec/Fallback 四个模型 ID`);
+    console.log(`  [2] 自定义模板 双引擎   需手动输入 Pro/Fast 模型 ID（Exec/Fallback 硬编码）\n`);
+    console.log(`\n${COLORS.yellow}⚠️  请确认已在 OpenCode 中通过 /connect 连接好对应模型，否则安装后无法正常使用${COLORS.reset}\n`);
     rl.question(`请输入选择 [M/D/N/T/2]（默认 M）: `, (answer) => {
       rl.close();
       const a = answer.trim().toLowerCase();
@@ -1397,6 +1416,9 @@ async function cmdSwitch(target) {
         fs.writeFileSync(destPath, content, 'utf-8');
 
         console.log(`\n${c.success('✅')} 已切换到: ${fp.label}`);
+        console.log(`${c.dim('   推理: ' + (models.pro || '(已填写)'))}`);
+        console.log(`${c.dim('   轻量: ' + (models.fast || '(已填写)'))}`);
+        if (models.exec) console.log(`${c.dim('   执行: ' + models.exec)}`);
         console.log(`${c.warning('⚠')} 请重启 OpenCode 以使配置生效\n`);
         break;
       }
@@ -1404,6 +1426,10 @@ async function cmdSwitch(target) {
       try {
         switchTo(fp.sourceFile, target);
         console.log(`\n${c.success('✅')} 已切换到: ${fp.label}`);
+        console.log(`${c.warning('⚠')} 请确认已在 OpenCode 中 /connect 连接以下模型：`);
+        console.log(`${c.dim('   推理: ' + fp.modelKeys.pro)}`);
+        console.log(`${c.dim('   轻量: ' + fp.modelKeys.fast)}`);
+        console.log(`${c.dim('   执行: ' + fp.modelKeys.exec)}`);
         console.log(`${c.warning('⚠')} 请重启 OpenCode 以使配置生效\n`);
       } catch (err) {
         console.log(`\n${c.error('❌')} 切换失败: ${err.message}\n`);

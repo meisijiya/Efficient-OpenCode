@@ -23,6 +23,9 @@ cd Efficient-OpenCode
 ./eoc install -d -p     # DeepSeek + MiniMax（覆盖模式）
 ```
 
+> ⚠️ **安装前必须**：在 OpenCode 中通过 `/connect` 连接对应模型。
+> 常用模型 ID 见下方 [预设模型 ID 速查](#-预设模型-id-速查) 表格。
+
 **`eoc` 命令一览**：
 
 | 命令 | 功能 |
@@ -112,6 +115,23 @@ cp configs/opencode-minimax-easy-vision.jsonc .opencode/
 | `oh-my-openagent-template2.json` | 🆕 模板 双引擎（仅 Pro/Fast 自定义） | `append` |
 | `oh-my-openagent-template2-prompt.json` | 🆕 模板 双引擎（仅 Pro/Fast 自定义） | `prompt` 覆盖 |
 | `opencode-minimax-easy-vision.jsonc` | EasyVision 图片拦截配置 | — |
+
+### 🔌 预设模型 ID 速查
+
+> ⚠️ **重要**：使用前请在 OpenCode 中通过 `/connect` 命令连接对应模型
+
+| 方案 | 层级 | 模型 ID |
+|:---|:---|:---|
+| **DeepSeek + MiniMax** | 推理 (Pro) | `opencode-go/deepseek-v4-pro` |
+| | 轻量 (Fast) | `opencode-go/deepseek-v4-flash` |
+| | 执行 (Exec) | `minimax-cn-coding-plan/MiniMax-M2.7` |
+| **MiMo + MiniMax** | 推理 (Pro) | `xiaomi-token-plan-cn/mimo-v2.5-pro` |
+| | 轻量 (Fast) | `xiaomi-token-plan-cn/mimo-v2.5` |
+| | 执行 (Exec) | `minimax-cn-coding-plan/MiniMax-M2.7` |
+| **纯 MiniMax** | 全部 | `minimax-cn-coding-plan/MiniMax-M2.7` |
+| **所有方案** | 视觉 (Looker) | `opencode-go/mimo-v2.5` |
+
+> 📝 **Template2 方案**：仅需输入 Pro/Fast 两个模型 ID，Exec 已硬编码为 MiniMax M2.7
 
 ### 🔀 Prompt 注入模式说明
 
