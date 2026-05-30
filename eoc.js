@@ -385,6 +385,18 @@ const FINGERPRINTS = [
     },
     description: '自定义 Pro/Fast 模型 + 执行/回退 MiniMax M2.7',
   },
+  {
+    id: 'solofast-append',
+    label: 'SoloFast 单Fast模型 + MiniMax M2.7（追加模式）',
+    sourceFile: 'ohmyopencode-solofast.json',
+    cliFlag: 'solofast',
+    modelKeys: {
+      pro: '{{FAST_MODEL_ID}}',
+      fast: 'minimax-cn-coding-plan/MiniMax-M2.7',
+      exec: 'minimax-cn-coding-plan/MiniMax-M2.7',
+    },
+    description: 'Fast 自定义模型 + 其余全 MiniMax M2.7（单模板占位符）',
+  },
 ];
 
 // ============================================================
@@ -592,6 +604,7 @@ function parseArgs() {
       else if (arg === '--minimax' || arg === '-x') result.engine = 'minimax';
       else if (arg === '--template' || arg === '-t') result.engine = 'template';
       else if (arg === '--template2' || arg === '-2') result.engine = 'template2';
+      else if (arg === '--solofast' || arg === '-s') result.engine = 'solofast';
       else if (arg === '--prompt' || arg === '-p') result.promptMode = 'prompt';
       else if (arg === '--global' || arg === '-g') result.global = true;
       else if (arg === '--help' || arg === '-h') result.command = 'help';
@@ -1005,6 +1018,30 @@ async function cmdInstall(target, engine, promptMode) {
     }
   }
 
+  // ---- SoloFast 模式：只需输入 Fast 模型 ID（其余全部 MiniMax M2.7） ----
+  if (engine === 'solofast') {
+    const sourceFile = getSourceFile(engine, promptMode);
+    const fastModel = await promptSolofastModel();
+    if (!fastModel) {
+      console.log(`${c.dim('已取消')}`);
+      process.exit(0);
+    }
+    console.log(`\n  Fast:    ${fastModel}`);
+    console.log(`  其余:    minimax-cn-coding-plan/MiniMax-M2.7（自动配置）`);
+    console.log('');
+    try {
+      const sourcePath = path.join(SOURCE_DIR, sourceFile);
+      let content = fs.readFileSync(sourcePath, 'utf-8');
+      content = content.replaceAll('{{FAST_MODEL_ID}}', fastModel);
+      JSON.parse(content); // 验证 JSON 合法性
+      templateContent = content;
+      console.log(`  ${c.success('✅')} SoloFast 模板填充成功，JSON 验证通过`);
+    } catch (err) {
+      console.log(`  ${c.error('❌')} 模板填充失败: ${err.message}`);
+      process.exit(1);
+    }
+  }
+
   // ---- 备份已有配置 ----
   const existing = fs.existsSync(getTargetFile(target));
   if (existing) {
@@ -1019,7 +1056,7 @@ async function cmdInstall(target, engine, promptMode) {
   // ---- 写入配置 ----
   const sourceFile = getSourceFile(engine, promptMode);
 
-  if ((engine === 'template' || engine === 'template2') && templateContent) {
+  if ((engine === 'template' || engine === 'template2' || engine === 'solofast') && templateContent) {
     fs.mkdirSync(getConfigDir(target), { recursive: true });
     fs.writeFileSync(getTargetFile(target), templateContent, 'utf-8');
   } else {
@@ -1072,15 +1109,17 @@ function selectEngineInteractive() {
     console.log(`  [D] DeepSeek + MiniMax  推理: opencode-go/deepseek-v4-pro | 执行: minimax-cn-coding-plan/MiniMax-M2.7`);
     console.log(`  [N] 纯 MiniMax M2.7     全引擎: minimax-cn-coding-plan/MiniMax-M2.7（单模型方案）`);
     console.log(`  [T] 自定义模板          需手动输入 Pro/Fast/Exec/Fallback 四个模型 ID`);
-    console.log(`  [2] 自定义模板 双引擎   需手动输入 Pro/Fast 模型 ID（Exec/Fallback 硬编码）\n`);
+    console.log(`  [2] 自定义模板 双引擎   需手动输入 Pro/Fast 模型 ID（Exec/Fallback 硬编码）`);
+    console.log(`  [S] 🆕 SoloFast 模板    只需输入 Fast 模型 ID（其余全部 MiniMax M2.7，推荐！）\n`);
     console.log(`\n${COLORS.yellow}⚠️  请确认已在 OpenCode 中通过 /connect 连接好对应模型，否则安装后无法正常使用${COLORS.reset}\n`);
-    rl.question(`请输入选择 [M/D/N/T/2]（默认 M）: `, (answer) => {
+    rl.question(`请输入选择 [M/D/N/T/2/S]（默认 M）: `, (answer) => {
       rl.close();
       const a = answer.trim().toLowerCase();
       if (a === 'd') resolve('deepseek');
       else if (a === 'n') resolve('minimax');
       else if (a === 't') resolve('template');
       else if (a === '2') resolve('template2');
+      else if (a === 's') resolve('solofast');
       else if (a === '' || a === 'm') resolve('mimo');
       else {
         console.log(`${c.error('无效选择')}`);
@@ -1199,12 +1238,37 @@ function promptTemplate2Models() {
 }
 
 /**
+ * SoloFast 模式：只需输入 Fast 模型 ID（其余全部 MiniMax M2.7）
+ * @returns {Promise<string|null>}
+ */
+function promptSolofastModel() {
+  return new Promise((resolve) => {
+    const rl = createReadline();
+    console.log(`\n${COLORS.cyan}SoloFast 模板 — 输入模型 ID${COLORS.reset}\n`);
+    console.log(`  SoloFast 架构（其余全部硬编码为 MiniMax M2.7）：`);
+    console.log(`  Fast → 所有推理型 Agent（Sisyphus/Oracle/Prometheus等）`);
+    console.log(`  MiniMax M2.7 → 代码搜索/轻量/执行（自动配置）\n`);
+
+    rl.question(`  Fast 模型 ID: `, (answer) => {
+      rl.close();
+      const val = answer.trim();
+      if (!val) {
+        console.log(`${c.error('❌ 模型 ID 不能为空')}`);
+        resolve(null);
+        return;
+      }
+      resolve(val);
+    });
+  });
+}
+
+/**
  * 获取引擎中文名称
  * @param {string} engine
  * @returns {string}
  */
 function engineName(engine) {
-  const map = { mimo: 'MiMo + MiniMax', deepseek: 'DeepSeek + MiniMax', minimax: '纯 MiniMax M2.7', template: '自定义模板', template2: '自定义模板 双引擎' };
+  const map = { mimo: 'MiMo + MiniMax', deepseek: 'DeepSeek + MiniMax', minimax: '纯 MiniMax M2.7', template: '自定义模板', template2: '自定义模板 双引擎', solofast: 'SoloFast 单Fast引擎' };
   return map[engine] || engine;
 }
 
@@ -1419,15 +1483,42 @@ async function cmdSwitch(target) {
 
       const fp = selected.value;
       // 模板不能用 switchTo 直接复制（占位符），需要现场填模型 ID
-      if (fp.cliFlag === 'template' || fp.cliFlag === 'template2') {
+      if (fp.cliFlag === 'template' || fp.cliFlag === 'template2' || fp.cliFlag === 'solofast') {
         console.log(`\n${COLORS.cyan}🔧 模板配置 — 输入模型 ID${COLORS.reset}`);
         console.log(`${COLORS.yellow}⚠️  请确认已在 OpenCode 中通过 /connect 连接好对应模型${COLORS.reset}\n`);
 
         let models;
+        let fastModel;
         if (fp.cliFlag === 'template2') {
           models = await promptTemplate2Models();
+        } else if (fp.cliFlag === 'solofast') {
+          fastModel = await promptSolofastModel();
         } else {
           models = await promptTemplateModels();
+        }
+
+        if (fp.cliFlag === 'solofast') {
+          if (!fastModel) {
+            console.log(`${c.warning('⚠')} 已取消\n`);
+            continue;
+          }
+          // 填充 SoloFast 模板（只有一个占位符）
+          const sourcePath = path.join(SOURCE_DIR, fp.sourceFile);
+          let content = fs.readFileSync(sourcePath, 'utf-8');
+          content = content.replaceAll('{{FAST_MODEL_ID}}', fastModel);
+          try {
+            JSON.parse(content);
+          } catch (e) {
+            console.log(`\n${c.error('❌')} 模板填充后 JSON 验证失败: ${e.message}\n`);
+            continue;
+          }
+          const destPath = path.join(getConfigDir(target), 'oh-my-openagent.json');
+          fs.writeFileSync(destPath, content, 'utf-8');
+          console.log(`\n${c.success('✅')} 已切换到: ${fp.label}`);
+          console.log(`${c.dim('   Fast: ' + fastModel)}`);
+          console.log(`${c.dim('   其余: minimax-cn-coding-plan/MiniMax-M2.7（自动配置）')}`);
+          console.log(`${c.warning('⚠')} 请重启 OpenCode 以使配置生效\n`);
+          break;
         }
 
         if (!models) {
@@ -1794,6 +1885,7 @@ ${COLORS.cyan}║${COLORS.reset}    -d, --deepseek   选择 DeepSeek + MiniMax
 ${COLORS.cyan}║${COLORS.reset}    -x, --minimax    选择纯 MiniMax M2.7
 ${COLORS.cyan}║${COLORS.reset}    -t, --template   选择自定义模板（4 层模型自定义）
 ${COLORS.cyan}║${COLORS.reset}    -2, --template2  选择自定义模板 双引擎（Pro/Fast 自定义，Exec/Fallback 硬编码）
+${COLORS.cyan}║${COLORS.reset}    -s, --solofast   🆕 选择 SoloFast 模板（只输入 Fast 模型，其余 MiniMax M2.7）
 ${COLORS.cyan}║${COLORS.reset}    -p, --prompt     使用覆盖模式（默认追加模式）
 ${COLORS.cyan}║${COLORS.reset}
 ${COLORS.cyan}║${COLORS.reset}  示例:

@@ -70,6 +70,10 @@ select_model() {
         MODEL_CHOICE="template"
         print_info "通过命令行参数选择：自定义模板"
         return
+    elif [ "$1" = "--solofast" ] || [ "$1" = "-s" ]; then
+        MODEL_CHOICE="solofast"
+        print_info "通过命令行参数选择：SoloFast 单Fast模型"
+        return
     fi
 
     echo ""
@@ -95,8 +99,12 @@ select_model() {
     echo "     - 手动输入模型 ID，由你完全掌控"
     echo "     - 支持三层模型：Pro / Fast / Exec + 备选"
     echo ""
+    echo "  5) SoloFast 模板（🆕 推荐）"
+    echo "     - 只用一个 Fast 模型 + MiniMax M2.7"
+    echo "     - 输入 Fast 模型 ID，其余自动配置为 MiniMax M2.7"
+    echo ""
     
-    read -p "请输入选项 (1/2/3/4，默认 1): " choice
+    read -p "请输入选项 (1/2/3/4/5，默认 1): " choice
     
     case "$choice" in
         2)
@@ -110,6 +118,10 @@ select_model() {
         4)
             MODEL_CHOICE="template"
             print_success "已选择：自定义模板"
+            ;;
+        5)
+            MODEL_CHOICE="solofast"
+            print_success "已选择：SoloFast 模板"
             ;;
         *)
             MODEL_CHOICE="mimo"
@@ -201,6 +213,50 @@ configure_template() {
     print_success "自定义配置已生成"
 }
 
+# SoloFast 模板：只需输入 FAST 模型 ID，其余固定为 MiniMax M2.7
+configure_solofast() {
+    local template_file="configs/ohmyopencode-solofast.json"
+    local temp_file="/tmp/ohmyopencode-solofast-$$.json"
+
+    if [ ! -f "$template_file" ]; then
+        print_error "模板文件不存在: $template_file"
+        exit 1
+    fi
+
+    echo ""
+    echo "=========================================="
+    echo -e "${BLUE}SoloFast 模板 - 输入 Fast 模型 ID${NC}"
+    echo "=========================================="
+    echo ""
+    echo "SoloFast 架构："
+    echo "  Fast 模型 → 用于所有推理型 Agent（Sisyphus/Oracle/Prometheus 等）"
+    echo "  MiniMax M2.7 → 用于代码搜索/轻量任务/执行（已自动配置）"
+    echo ""
+
+    read -p "Fast 模型 ID: " FAST_MODEL
+
+    if [ -z "$FAST_MODEL" ]; then
+        print_error "模型 ID 不能为空"
+        exit 1
+    fi
+
+    print_info "正在生成配置..."
+
+    sed "s|{{FAST_MODEL_ID}}|${FAST_MODEL}|g" "$template_file" > "$temp_file"
+
+    # 验证生成的是合法 JSON
+    if ! python3 -m json.tool "$temp_file" > /dev/null 2>&1; then
+        print_error "生成的配置 JSON 不合法，请检查模型 ID 是否包含特殊字符"
+        rm -f "$temp_file"
+        exit 1
+    fi
+
+    cp "$temp_file" "$HOME/.config/opencode/oh-my-openagent.json"
+    rm -f "$temp_file"
+    print_success "SoloFast 配置已生成"
+
+}
+
 # 备份现有配置
 backup_configs() {
     print_info "备份现有配置..."
@@ -236,6 +292,11 @@ install_configs() {
         configure_template
         if [ "$PROMPT_MODE" = "prompt" ]; then
             print_warning "模板方案暂不支持 prompt 覆盖模式，使用 prompt_append 追加模式"
+        fi
+    elif [ "$MODEL_CHOICE" = "solofast" ]; then
+        configure_solofast
+        if [ "$PROMPT_MODE" = "prompt" ]; then
+            print_warning "SoloFast 方案暂不支持 prompt 覆盖模式，使用 prompt_append 追加模式"
         fi
     else
         local suffix=""
@@ -288,11 +349,12 @@ install_easyvision() {
         print_success "EasyVision 配置文件已复制"
     fi
     
-    if npm list -g opencode-minimax-easy-vision &> /dev/null; then
+    if [ -d "$HOME/.config/opencode/plugins/opencode-minimax-easy-vision" ]; then
         print_success "EasyVision 插件已安装"
     else
         print_info "安装 EasyVision 插件..."
-        npm install -g opencode-minimax-easy-vision
+        opencode plugin opencode-minimax-easy-vision --global 2>/dev/null || \
+            git clone https://github.com/devadathanmb/opencode-minimax-easy-vision.git "$HOME/.config/opencode/plugins/opencode-minimax-easy-vision" 2>/dev/null
         print_success "EasyVision 插件安装完成"
     fi
 }

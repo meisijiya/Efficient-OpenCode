@@ -20,6 +20,8 @@ cd Efficient-OpenCode
 ./eoc install -m        # MiMo + MiniMax（追加模式）
 ./eoc install -x        # 纯 MiniMax M2.7（追加模式）
 ./eoc install -t        # 自定义模板（手动输入模型 ID）
+./eoc install -2        # 自定义模板 双引擎（Pro/Fast 自定义）
+./eoc install -s        # 🆕 SoloFast 模板（只输入 Fast 模型，其余 MiniMax）
 ./eoc install -d -p     # DeepSeek + MiniMax（覆盖模式）
 ```
 
@@ -61,6 +63,7 @@ chmod +x install.sh
 ./install.sh --deepseek  # DeepSeek + MiniMax
 ./install.sh --minimax   # 纯 MiniMax M2.7
 ./install.sh --template  # 自定义模板
+./install.sh --solofast  # 🆕 SoloFast 模板
 ```
 
 ### 方式三：手动安装
@@ -82,8 +85,8 @@ cp configs/oh-my-openagent-deepseek.json ~/.config/opencode/oh-my-openagent.json
 # 3. 复制 EasyVision 配置
 cp configs/opencode-minimax-easy-vision.jsonc ~/.config/opencode/
 
-# 4. 安装 EasyVision 插件
-npm install -g opencode-minimax-easy-vision
+# 4. 安装 EasyVision 插件（官方安装方式）
+opencode plugin opencode-minimax-easy-vision --global
 
 # 5. 重启 OpenCode 生效
 ```
@@ -116,6 +119,7 @@ cp configs/opencode-minimax-easy-vision.jsonc .opencode/
 | `oh-my-openagent-template-prompt.json` | 模板 4 引擎（手动输入模型 ID） | `prompt` 覆盖 |
 | `oh-my-openagent-template2.json` | 🆕 模板 双引擎（仅 Pro/Fast 自定义） | `append` |
 | `oh-my-openagent-template2-prompt.json` | 🆕 模板 双引擎（仅 Pro/Fast 自定义） | `prompt` 覆盖 |
+| `ohmyopencode-solofast.json` | 🆕 SoloFast 模板（仅 Fast 自定义，其余 MiniMax） | `append` |
 | `opencode-minimax-easy-vision.jsonc` | EasyVision 图片拦截配置 | — |
 
 ### 🔌 预设模型 ID 速查
@@ -134,6 +138,7 @@ cp configs/opencode-minimax-easy-vision.jsonc .opencode/
 | **所有方案** | 视觉 (Looker) | `opencode-go/mimo-v2.5` |
 
 > 📝 **Template2 方案**：仅需输入 Pro/Fast 两个模型 ID，Exec 已硬编码为 MiniMax M2.7
+> 📝 **SoloFast 方案**：仅需输入 Fast 一个模型 ID，其余全部硬编码为 MiniMax M2.7
 
 ### 🔀 Prompt 注入模式说明
 
@@ -161,6 +166,23 @@ OhMyOpenAgent 支持两种自定义注入方式：
 ./install.sh --template
 # 按提示输入 4 个模型 ID → 自动生成最终配置
 ```
+
+### 🚀 SoloFast 模板（🆕 推荐，方案 5）
+
+`ohmyopencode-solofast.json` 是简化版模板——**只需要输入一个 Fast 模型 ID**，其余全部固定为 MiniMax M2.7：
+
+| 占位符 | 用途 | 覆盖的 Agent |
+|--------|------|-------------|
+| `{{FAST_MODEL_ID}}` | 推理型模型 | Sisyphus、Oracle、Prometheus、Hephaestus、Metis |
+| `minimax-cn-coding-plan/MiniMax-M2.7` | 执行/轻量 | 其余所有 Agent（已自动配置） |
+
+```bash
+./eoc install -s        # eoc 方式
+./install.sh --solofast  # install.sh 方式
+# 只需要输入 1 个 Fast 模型 ID → 秒级搭建
+```
+
+> 💡 **SoloFast 适用于**：你只有一个主力推理模型（如 `openrouter/anthropic/claude-sonnet-4`），想让其余所有 Agent 统一用 MiniMax M2.7 执行代码搜索和轻量任务。
 
 ### 安装后需要放在 `~/.config/opencode/` 的文件
 
@@ -427,6 +449,10 @@ mmx-cli login
 ## 📝 更新日志
 
 ### 2026-05-30
+- 🆕 新增 `ohmyopencode-solofast.json` SoloFast 模板——只需一个 Fast 模型 ID，其余全部 MiniMax M2.7
+  - `install.sh` 支持 `--solofast`/`-s` 参数和交互选项 5
+  - `eoc.js` 支持 `-s`/`--solofast` 命令行参数 + 交互菜单 [S]
+- 🔧 修复 EasyVision 安装方式：从 `npm install -g` 改为官方 `opencode plugin` 命令（`eoc.js` + `install.sh`）
 - 🆕 新增 `eoc.js` 配置切换器（~1700 行）——方向键交互菜单 + 命令行双模式，install/switch 二合一
   - 支持智能入口：首次引导安装，已安装进入切换菜单
   - 支持项目级配置（`./.opencode/`）管理，全局/项目级双层级
