@@ -1,0 +1,6 @@
+# OpenCode session data
+.omo/
+.sisyphus/
+
+# Design documents (not needed at runtime)
+docs/plans/

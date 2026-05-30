@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
   "agents": {
     "sisyphus": {
-      "model": "opencode-go/deepseek-v4-pro",
+      "model": "__PRO_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -19,7 +19,7 @@
     "atlas": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "🚀 执行主力——代码落地+MiniMax全模态管线（视频/语音/音乐/图片），全栈Skill全覆盖",
       "skills": [
@@ -37,7 +37,7 @@
       "prompt_append": "## ⚡ 你的工具清单\n### 核心Skill（预加载）\n- frontend-dev：电影级前端(Framer Motion/GSAP + AI素材生成)\n- fullstack-dev：全栈(Express/Next.js/Go/Python)\n- react-native-dev：RN/Expo全家桶\n- shader-dev：GLSL着色器特效\n- minimax-multimodal-toolkit：视频(Hailuo)/语音(Speech)/音乐(Music)/图片(Image)一站式生成\n- minimax-pdf/docx/xlsx：文档三件套(零格式丢失)\n- pptx-generator：PPT全流程(封面/目录/内容/总结)\n- test-driven-development：红灯→绿灯→重构\n### 可用工具（直接调用）\n- MiniMax CLI：多模态生成(视频/语音/音乐/图片) + 资料检索(web_search)\n- MiniMax MCP：understand_image(视觉分析，通过EasyVision插件)\n- Playwright：浏览器自动化测试\n### 关键规则\n- 完成后跑 webapp-testing 验证前端效果\n- 文档类产出用 minimax-pdf/docx/xlsx 而非手写Markdown\n- 前端产出必须带电影级动画"
     },
     "hephaestus": {
-      "model": "opencode-go/deepseek-v4-pro",
+      "model": "__PRO_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -50,7 +50,7 @@
       "prompt_append": "## ⚡ 你的工作流程\n### 调试六步法(systematic-debugging)\n1. 复现Bug 2. 缩小范围 3. 建立假设 4. 打桩/日志 5. 修复根因 6. 回归测试防复发\n### 何时调用Oracle\n- 2次修复失败后→让Oracle读代码做根因分析\n- 跨模块改动前→让Oracle评审影响面\n### 关键规则\n- 修复根因，不修症状\n- 每步修复后验证(must pass tests)\n- 不改测试来'pass'——那是作弊\n- 3次失败→立即停止→回滚→咨询Oracle"
     },
     "prometheus": {
-      "model": "opencode-go/deepseek-v4-pro",
+      "model": "__PRO_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -61,7 +61,7 @@
       "prompt_append": "## ⚡ 你的规划模板\n### 输出结构\n1. 任务拆解：原子级子任务列表，标注可并行项\n2. 依赖关系：哪些任务必须等前面的完成\n3. 验收标准：每个子任务的'done'条件\n4. 模型推荐：每个任务建议用哪个category/agent\n5. Skill推荐：每个任务建议加载哪些Skill\n### 关键规则\n- 每个子任务必须可独立验证\n- 并行机会必须明确标注\n- 输出保存为 .sisyphus/plans/*.md 格式"
     },
     "oracle": {
-      "model": "opencode-go/deepseek-v4-pro",
+      "model": "__PRO_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -74,7 +74,7 @@
       "prompt_append": "## ⚡ 你的分析边界\n### 你可以做\n- 分析架构/代码模式/性能瓶颈\n- 提出多个方案并给出权衡分析\n- 对照文档挑战现有设计\n- 审查安全问题和潜在风险\n### 你绝不能做\n- 写代码、改文件\n- 做最终决策（由Sisyphus决策）\n- 代替其他Agent执行任务"
     },
     "metis": {
-      "model": "opencode-go/deepseek-v4-pro",
+      "model": "__PRO_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -87,7 +87,7 @@
     "momus": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "🔎 代码审查——双轴审查(规范+需求)+强制验证门禁，不为礼貌牺牲质量",
       "skills": [
@@ -97,7 +97,7 @@
       "prompt_append": "## ⚡ 你的审查清单\n### 双轴审查(review)\n- Standards轴：代码是否符合项目规范\n- Spec轴：代码是否匹配原始需求\n### 强制验证(verification-before-completion)\n- 触发词：done/complete/finished/fixed→必须先跑验证\n- 验证通过前不说'完成'\n### 审查工具\n- MiniMax CLI web_search：查业界最佳实践做参照\n- lsp_diagnostics：检查Lint/类型错误\n- bash：运行测试/build命令\n### 审查链\n- 日常：review（双轴并行）\n- PR前：review-work（五重并行：Oracle×2 + QA + 上下文挖掘）"
     },
     "explore": {
-      "model": "opencode-go/deepseek-v4-flash",
+      "model": "__FAST_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -105,7 +105,7 @@
       "prompt_append": "## ⚡ 你的搜索工具箱\n### 内部搜索(代码库)\n- Grep：正则全文搜索\n- Glob：文件名模式匹配\n- ast_grep_search：AST结构化搜索(25种语言)\n- lsp_find_references：查找所有引用\n- lsp_symbols：文档/工作区符号搜索\n### 外部搜索\n- MiniMax CLI web_search：查开源代码参考\n### 互补分工\n- explore → 内部代码库搜索\n- librarian → 外部文档/开源参考查询"
     },
     "librarian": {
-      "model": "opencode-go/deepseek-v4-flash",
+      "model": "__FAST_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -113,7 +113,7 @@
       "prompt_append": "## ⚡ 你的搜索策略\n### 搜索工具\n- MiniMax CLI web_search：实时网页搜索\n- websearch_web_search_exa：语义搜索GitHub等\n- context7_query-docs：Context7文档库查询(先resolve-library-id)\n- grep_app_searchGitHub：GitHub代码搜索\n### 互补分工\n- librarian → 外部文档/API/最佳实践查询\n- explore → 内部代码库搜索"
     },
     "sisyphus-junior": {
-      "model": "opencode-go/deepseek-v4-flash",
+      "model": "__FAST_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -136,7 +136,7 @@
     "visual-engineering": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "🎨 前端/UI/动画——MiniMax M2.7执行，Pro兜底。Skill: frontend-dev/frontend-ui-ux/shader-dev/minimax-multimodal-toolkit",
       "prompt_append": "## 🎨 前端任务必加载Skill\n- frontend-dev：电影级动画(Framer Motion/GSAP)+ AI媒体素材生成\n- frontend-ui-ux：设计师级UI/UX(无设计稿也能出精品)\n- shader-dev：GLSL着色器特效(按需)\n- minimax-multimodal-toolkit：通过MiniMax CLI生成图片/视频素材\n- webapp-testing：Playwright E2E验证前端效果\n### 产出标准\n- 必须带动画效果\n- 响应式设计\n- E2E测试通过"
@@ -144,7 +144,7 @@
     "multimodal": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "🌐 全模态生成——MiniMax M2.7一站式(视频/语音/音乐/图片)。Skill: minimax-multimodal-toolkit",
       "prompt_append": "## 🌐 全模态任务必加载Skill\n- minimax-multimodal-toolkit：一站式全模态生成\n### MiniMax CLI命令速查\n- 视频生成→minimax video generate\n- 语音合成→minimax speech generate\n- 音乐创作→minimax music generate\n- 图片生成→minimax image generate"
@@ -152,7 +152,7 @@
     "video-generation": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "🎬 视频生成——Hailuo 2.3 (text-to-video/image-to-video/首尾帧/长视频)。Skill: minimax-multimodal-toolkit",
       "prompt_append": "## 🎬 视频生成必加载Skill: minimax-multimodal-toolkit\n### 支持模式\n- text-to-video：文本直接生成视频\n- image-to-video：图片+描述生成视频\n- start-end frame：首尾帧控制\n- subject reference：主题参考保持一致性\n- long-form：多场景长视频编排"
@@ -160,7 +160,7 @@
     "speech-synthesis": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "🎙️ 语音合成——Speech 2.8 (TTS/声音克隆/多段合成)。Skill: minimax-multimodal-toolkit",
       "prompt_append": "## 🎙️ 语音合成必加载Skill: minimax-multimodal-toolkit\n### 支持能力\n- TTS：文本→自然语音\n- 声音克隆：从样本克隆音色\n- 声音设计：自定义音色参数\n- 多段合成：拼接多段语音为长音频"
@@ -168,7 +168,7 @@
     "music-composition": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "🎵 音乐创作——Music 2.6 (歌曲带人声/纯音乐器乐)。Skill: minimax-multimodal-toolkit",
       "prompt_append": "## 🎵 音乐创作必加载Skill: minimax-multimodal-toolkit\n### 支持模式\n- 歌曲(song)：带歌词+人声演唱\n- 纯音乐(instrumental)：器乐演奏\n- 风格描述：如'中国风电音'、'钢琴叙事曲'"
@@ -176,7 +176,7 @@
     "image-generation": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "🖼️ 图片生成——Image 01 (text-to-image/image-to-image/角色参考)。Skill: minimax-multimodal-toolkit",
       "prompt_append": "## 🖼️ 图片生成必加载Skill: minimax-multimodal-toolkit\n### 支持模式\n- text-to-image：文本描述生成图片\n- image-to-image：参考图+描述生成新图\n- character reference：角色一致性参考生成"
@@ -184,7 +184,7 @@
     "local-vision": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-flash"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "📂 本地图片识别——MCP understand_image分析本地文件路径图片(OCR/图表)。Skill: vision-analysis",
       "prompt_append": "## 📂 本地图片识别专用通道\n### 工具\n- MiniMax_understand_image：通过文件路径分析图片\n### 适用场景\n- 明确提供本地文件路径的图片（如 /tmp/screenshot.png）\n- 大量图片文件的批量分析\n- 需要结构化OCR输出的文档扫描件\n### 与 vision-analysis 的区别\n- local-vision：专门走 MCP 文件路径分析（专用于本地文件）\n- vision-analysis：通用视觉理解（可直接接收粘贴的图片）\n### 不做什么\n- 不处理非文件路径的图片（粘贴图片→用 vision-analysis）\n- 不生成图片（生成→用 image-generation）"
@@ -192,22 +192,21 @@
     "vision-analysis": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "👁️ 视觉分析——MiniMax understand_image图片理解(OCR/UI审查/图表)。Skill: vision-analysis",
       "prompt_append": "## 👁️ 视觉分析必加载Skill: vision-analysis\n### 分析工具\n- MiniMax_understand_image：核心视觉分析API\n### 输出格式\n- 结构化报告：分类描述+关键发现+建议\n### 不要混淆\n- vision-analysis=图片理解\n- image-generation=图片生成"
     },
     "web-research": {
-      "model": "opencode-go/deepseek-v4-flash",
+      "model": "__FAST_MODEL__",
       "fallback": [
-        "minimax-cn-coding-plan/MiniMax-M2.7",
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "🌐 上网搜索——DeepSeek V4 Flash低成本搜+Pro深度分析。工具: web_search/websearch_exa/context7",
       "prompt_append": "## 🌐 搜索策略\n### 工具选择\n- MiniMax_web_search：中文/实时信息搜索\n- websearch_web_search_exa：英文/语义搜索\n- context7_query-docs：官方文档库查询\n- grep_app_searchGitHub：GitHub代码搜索\n### 成本策略\n- 先用DeepSeek V4 Flash搜（低成本）\n- 结果不足→fallback到Pro做深度分析"
     },
     "quick": {
-      "model": "opencode-go/deepseek-v4-flash",
+      "model": "__FAST_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -215,7 +214,7 @@
       "prompt_append": "## ⚡ 快速修复边界\n### 能做\n- 单文件typo/语法错误\n- 单行配置修改\n- 依赖版本号更新\n### 不能做\n- 多文件协调改动→用 deep\n- 逻辑推理/架构变更→用 ultrabrain\n- 代码重构→用 deep"
     },
     "deep": {
-      "model": "opencode-go/deepseek-v4-pro",
+      "model": "__PRO_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -225,13 +224,13 @@
     "artistry": {
       "model": "minimax-cn-coding-plan/MiniMax-M2.7",
       "fallback": [
-        "opencode-go/deepseek-v4-pro"
+        "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
       "description": "🎭 创意突破——M2.7创造性思维跳出框架，创新方案设计。Skill: brainstorming",
       "prompt_append": "## 🎭 创意流程\n### 必加载Skill: brainstorming\n1. 需求探索：理解用户真实意图\n2. 方案发散：3+个不同方向的方案\n3. 方案评估：可行性/创新性/成本\n4. 原型验证：低成本快速试错\n### 与其他category区别\n- artistry=跳出框架的创新方案\n- deep=深入研究+落地实现\n- ultrabrain=硬核逻辑推理"
     },
     "ultrabrain": {
-      "model": "opencode-go/deepseek-v4-pro",
+      "model": "__PRO_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -239,7 +238,7 @@
       "prompt_append": "## 🧠 硬核推理策略\n### 适用场景\n- 复杂算法设计与优化\n- 多系统架构权衡决策\n- 高难度数学/逻辑证明\n- 分布式系统协同方案\n### 与deep区别\n- ultrabrain：给目标→自己推理最优路径(不干预)\n- deep：自主探索+分步实现(可干预)\n### 不要滥用\n- 日常代码→用 quick/deep\n- 简单算法→用 deep"
     },
     "unspecified-low": {
-      "model": "opencode-go/deepseek-v4-flash",
+      "model": "__FAST_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -247,7 +246,7 @@
       "prompt_append": "## 📦 使用提醒\n- 这是fallback类别，优先匹配 quick/deep 等专项类别\n- 仅用于小型通用任务\n- 如发现任务有明确特征→切换到适配的category"
     },
     "unspecified-high": {
-      "model": "opencode-go/deepseek-v4-pro",
+      "model": "__PRO_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],
@@ -255,7 +254,7 @@
       "prompt_append": "## 📦 使用提醒\n- 这是fallback类别，优先匹配 deep/ultrabrain/artistry 等专项类别\n- 仅用于高复杂度通用任务\n- 如发现任务有明确特征→切换到适配的category"
     },
     "writing": {
-      "model": "opencode-go/deepseek-v4-pro",
+      "model": "__PRO_MODEL__",
       "fallback": [
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ],

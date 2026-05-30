@@ -2,21 +2,143 @@
 
 > OhMyOpenCode 高效配置方案 — DeepSeek V4 × MiniMax M2.7 / MiMo V2.5 × MiniMax M2.7 双引擎效率革命
 
-本仓库包含两套经过优化的 OhMyOpenCode 配置，旨在**最大化缓存命中率、降低 token 消耗、提升多智能体协作效率**。
+本仓库包含多套经过优化的 OhMyOpenCode 配置，提供 **`eoc.js` 配置切换器**（方向键菜单 + 命令行双模式），旨在**最大化缓存命中率、降低 token 消耗、提升多智能体协作效率**。
+
+## ⚡ 快速开始
+
+### 方式一：eoc.js 智能管理（🎉 推荐）
+
+```bash
+git clone git@github.com:meisijiya/Efficient-OpenCode.git
+cd Efficient-OpenCode
+
+# 一键安装（交互式选择引擎+Prompt模式）
+./eoc
+
+# 或跳过交互，直接指定方案
+./eoc install -d        # DeepSeek + MiniMax（追加模式）
+./eoc install -m        # MiMo + MiniMax（追加模式）
+./eoc install -x        # 纯 MiniMax M2.7（追加模式）
+./eoc install -t        # 自定义模板（手动输入模型 ID）
+./eoc install -d -p     # DeepSeek + MiniMax（覆盖模式）
+```
+
+**`eoc` 命令一览**：
+
+| 命令 | 功能 |
+|:---|:---|
+| `./eoc` | 智能入口——首次自动引导安装，已安装则进入切换菜单 |
+| `./eoc install` | 安装/重装配置到 `~/.config/opencode/` |
+| `./eoc switch` | 🎮 方向键菜单切换配置方案（8选1，支持详情/回滚） |
+| `./eoc status` | 📊 查看当前激活的配置方案和模型分配详情 |
+| `./eoc rollback` | ⏪ 回滚到历史备份（自动保留最近10份） |
+| `./eoc help` | ❓ 显示帮助信息 |
+
+**核心特性**：
+- 🎮 方向键 ↑↓ 交互菜单 + 命令行参数双模式
+- 🔍 模型 ID 指纹自动识别当前方案
+- 💾 自动备份（时间戳命名，保留 10 个，自动去重）
+- 📦 零 npm 依赖——纯 Node.js 内置模块
+- 🧠 安装 vs 切换分离——依赖只装一次，后续秒切
+
+### 方式二：传统 install.sh（保留兼容）
+
+```bash
+git clone git@github.com:meisijiya/Efficient-OpenCode.git
+cd Efficient-OpenCode
+chmod +x install.sh
+
+# 交互式安装
+./install.sh
+
+# 跳过交互
+./install.sh --mimo      # MiMo + MiniMax（默认）
+./install.sh --deepseek  # DeepSeek + MiniMax
+./install.sh --minimax   # 纯 MiniMax M2.7
+./install.sh --template  # 自定义模板
+```
+
+### 方式三：手动安装
+
+```bash
+# 1. 克隆仓库
+git clone git@github.com:meisijiya/Efficient-OpenCode.git
+
+# 2. 复制配置文件
+
+# MiMo 版本
+cp configs/opencode.json ~/.config/opencode/opencode.json
+cp configs/oh-my-openagent-mimo.json ~/.config/opencode/oh-my-openagent.json
+
+# DeepSeek 版本
+cp configs/opencode.json ~/.config/opencode/opencode.json
+cp configs/oh-my-openagent-deepseek.json ~/.config/opencode/oh-my-openagent.json
+
+# 3. 复制 EasyVision 配置
+cp configs/opencode-minimax-easy-vision.jsonc ~/.config/opencode/
+
+# 4. 安装 EasyVision 插件
+npm install -g opencode-minimax-easy-vision
+
+# 5. 重启 OpenCode 生效
+```
+
+### 方式四：项目级配置（可选）
+
+```bash
+mkdir .opencode
+cp configs/opencode.json .opencode/opencode.json
+cp configs/oh-my-openagent.json .opencode/oh-my-openagent.json
+cp configs/opencode-minimax-easy-vision.jsonc .opencode/
+```
+
+**⚠️ 注意**：项目级配置会覆盖用户级配置，只对当前项目生效。
 
 ## 📁 配置文件清单
 
 ### configs/ 目录下的文件
 
-| 文件名 | 用途 | 是否必需 |
-|--------|------|----------|
-| `opencode.json` | OpenCode 主配置（MiMo 版本，默认） | ✅ 是 |
-| `oh-my-openagent.json` | OhMyOpenAgent 多智能体配置（MiMo 版本，默认） | ✅ 是 |
-| `opencode-deepseek.json` | OpenCode 主配置（DeepSeek 版本） | 按需选择 |
-| `oh-my-openagent-deepseek.json` | OhMyOpenAgent 多智能体配置（DeepSeek 版本） | 按需选择 |
-| `opencode-mimo.json` | OpenCode 主配置（MiMo 版本，备份） | ❌ 备份 |
-| `oh-my-openagent-mimo.json` | OhMyOpenAgent 多智能体配置（MiMo 版本，备份） | ❌ 备份 |
-| `opencode-minimax-easy-vision.jsonc` | EasyVision 图片拦截配置 | ✅ 是 |
+| 文件名 | 用途 | Prompt 模式 |
+|--------|------|-------------|
+| `opencode.json` | OpenCode 主配置（所有方案通用） | — |
+| `oh-my-openagent-mimo.json` | MiMo 版本 | `append` |
+| `oh-my-openagent-deepseek.json` | DeepSeek 版本 | `append` |
+| `oh-my-openagent-minimax.json` | 纯 MiniMax M2.7 | `append` |
+| `oh-my-openagent-template.json` | 模板（手动输入模型 ID） | `append` |
+| `oh-my-openagent-mimo-prompt.json` | MiMo 版本 | `prompt` 覆盖 |
+| `oh-my-openagent-deepseek-prompt.json` | DeepSeek 版本 | `prompt` 覆盖 |
+| `oh-my-openagent-minimax-prompt.json` | 纯 MiniMax M2.7 | `prompt` 覆盖 |
+| `oh-my-openagent-template-prompt.json` | 模板 4 引擎（手动输入模型 ID） | `prompt` 覆盖 |
+| `oh-my-openagent-template2.json` | 🆕 模板 双引擎（仅 Pro/Fast 自定义） | `append` |
+| `oh-my-openagent-template2-prompt.json` | 🆕 模板 双引擎（仅 Pro/Fast 自定义） | `prompt` 覆盖 |
+| `opencode-minimax-easy-vision.jsonc` | EasyVision 图片拦截配置 | — |
+
+### 🔀 Prompt 注入模式说明
+
+OhMyOpenAgent 支持两种自定义注入方式：
+
+| 模式 | 字段 | 效果 | 适用场景 |
+|------|------|------|---------|
+| **追加模式** | `prompt_append` | 你的内容追加在官方系统提示**之后** | 新手、希望保留官方完整行为的场景 |
+| **覆盖模式** | `prompt` | 你的内容**完全替换**官方系统提示 | 进阶、需要自定义全部 Agent 行为的场景 |
+
+> ⚠️ 覆盖模式需要自己在 prompt 中定义完整身份和全部行为规则。当前 `-prompt.json` 变体已包含完整的 `<agent-identity>` 身份声明、角色描述和边界约束。
+
+### 🏗️ 自定义模板（方案 4）
+
+`oh-my-openagent-template.json` 使用三层占位符，安装时由你输入实际模型 ID：
+
+| 占位符 | 用途 | 覆盖的 Agent |
+|--------|------|-------------|
+| `__PRO_MODEL__` | 推理型模型 | Sisyphus、Oracle、Prometheus、Hephaestus、Metis |
+| `__FAST_MODEL__` | 轻量模型 | Explore、Librarian、Sisyphus-Junior |
+| `__EXEC_MODEL__` | 执行型模型 | Atlas、Momus、Multimodal-Looker |
+| `__FALLBACK_MODEL__` | 备选模型 | 所有 Agent 的 fallback |
+
+```bash
+./install.sh --template
+# 按提示输入 4 个模型 ID → 自动生成最终配置
+```
 
 ### 安装后需要放在 `~/.config/opencode/` 的文件
 
@@ -25,7 +147,7 @@
 ```bash
 ~/.config/opencode/
 ├── opencode.json                   # ← 从 configs/opencode.json 复制
-├── oh-my-openagent.json            # ← 从 configs/oh-my-openagent.json 复制
+├── oh-my-openagent.json            # ← 从 configs/oh-my-openagent-mimo.json 复制（重命名）
 └── opencode-minimax-easy-vision.jsonc  # ← 从 configs/opencode-minimax-easy-vision.jsonc 复制
 ```
 
@@ -33,7 +155,7 @@
 
 ```bash
 ~/.config/opencode/
-├── opencode.json                   # ← 从 configs/opencode-deepseek.json 复制（重命名）
+├── opencode.json                   # ← 从 configs/opencode.json 复制
 ├── oh-my-openagent.json            # ← 从 configs/oh-my-openagent-deepseek.json 复制（重命名）
 └── opencode-minimax-easy-vision.jsonc  # ← 从 configs/opencode-minimax-easy-vision.jsonc 复制
 ```
@@ -42,46 +164,12 @@
 
 1. **目标文件名必须是 `opencode.json` 和 `oh-my-openagent.json`**，无论选择哪个方案
 2. **`opencode-minimax-easy-vision.jsonc` 两个方案通用**，必须复制
-3. **备份文件（`opencode-mimo.json`、`oh-my-openagent-mimo.json`）不需要复制**，仅供参考
-
-## ⚡ 快速开始
-
-### 方式一：一键安装（推荐）
-
-```bash
-git clone git@github.com:meisijiya/Efficient-OpenCode.git
-cd Efficient-OpenCode
-chmod +x install.sh
-./install.sh
-```
-
-### 方式二：手动安装
-
-```bash
-# 1. 克隆仓库
-git clone git@github.com:meisijiya/Efficient-OpenCode.git
-
-# 2. 复制配置文件到 OpenCode 配置目录（选择 MiMo 或 DeepSeek 版本）
-
-# MiMo 版本（默认）
-cp configs/opencode.json ~/.config/opencode/opencode.json
-cp configs/oh-my-openagent.json ~/.config/opencode/oh-my-openagent.json
-
-# DeepSeek 版本
-cp configs/opencode-deepseek.json ~/.config/opencode/opencode.json
-cp configs/oh-my-openagent-deepseek.json ~/.config/opencode/oh-my-openagent.json
-
-# 3. 复制 EasyVision 配置
-cp configs/opencode-minimax-easy-vision.jsonc ~/.config/opencode/
-
-# 4. 重启 OpenCode 生效
-```
 
 ## 📋 两套配置说明
 
 本仓库提供两套配置，适用于不同的模型组合：
 
-### 1. MiMo + MiniMax（默认）
+### 方案 A：MiMo + MiniMax（默认）
 
 | 引擎 | 模型 | 职责 |
 |------|------|------|
@@ -91,9 +179,9 @@ cp configs/opencode-minimax-easy-vision.jsonc ~/.config/opencode/
 
 **配置文件**：
 - `opencode.json`
-- `oh-my-openagent.json`
+- `oh-my-openagent-mimo.json`
 
-### 2. DeepSeek + MiniMax
+### 方案 B：DeepSeek + MiniMax
 
 | 引擎 | 模型 | 职责 |
 |------|------|------|
@@ -108,91 +196,6 @@ cp configs/opencode-minimax-easy-vision.jsonc ~/.config/opencode/
 ## 🔌 连接方式
 
 通过 OpenCode 的 `/connect` 命令连接到 DeepSeek 和 MiniMax 服务，无需在配置文件中手动配置 provider。
-
-## 📂 配置级别说明
-
-### 默认：用户级配置（推荐）
-
-本配置默认使用**用户级配置**，配置文件位于 `~/.config/opencode/` 目录下，对所有项目生效。
-
-```
-~/.config/opencode/
-├── opencode.json                   # OpenCode 主配置
-├── oh-my-openagent.json            # OhMyOpenAgent 多智能体配置
-└── opencode-minimax-easy-vision.jsonc  # EasyVision 图片拦截配置
-```
-
-### 进阶：项目级配置（可选）
-
-如果需要为不同项目使用不同配置（比如一个项目用 MiMo，另一个用 DeepSeek），可以在项目根目录下创建 `.opencode/` 目录：
-
-```bash
-# 在项目根目录下创建 .opencode 目录
-mkdir .opencode
-
-# 复制配置文件到项目级目录
-cp configs/opencode.json .opencode/opencode.json
-cp configs/oh-my-openagent.json .opencode/oh-my-openagent.json
-cp configs/opencode-minimax-easy-vision.jsonc .opencode/
-```
-
-**⚠️ 注意事项**：
-- 项目级配置会**覆盖**用户级配置
-- 项目级配置只对当前项目生效
-- 如果没有特殊需求，建议使用默认的用户级配置
-
-## 🎯 本配置的核心优化
-
-### 1. Compaction 上下文压缩
-
-```json
-"compaction": {
-  "auto": true,
-  "prune": true,
-  "tail_turns": 3,
-  "preserve_recent_tokens": 8000,
-  "reserved": 16000
-}
-```
-
-**效果**：长会话中自动压缩历史上下文，避免 token 无限膨胀。
-
-### 2. Sisyphus 强制委托纪律
-
-本配置在 Sisyphus 的 `prompt_append` 中加入了**强制委托规则**：
-
-- ❌ 读文件/搜索代码 → 必须用 explore agent（Flash）
-- ❌ 查文档/找库用法 → 必须用 librarian agent（Flash）
-- ❌ 写代码/改代码 → 必须用 task(category=...) 委托
-- ❌ 简单修复/typo → 必须用 task(category="quick") 委托
-
-**效果**：Sisyphus（Pro）只做编排决策，具体活让 Flash 和 M2.7 干，成本直降 50%+。
-
-### 3. Karpathy 四原则（全局执行宪法）
-
-借鉴 [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) 项目，引入 Andrej Karpathy 关于 LLM 编程陷阱的四大原则：
-
-| 原则 | 解决的问题 | 具体规则 |
-|------|-----------|---------|
-| **Think Before Coding** | 错误假设、隐藏困惑 | 明确声明假设、呈现多种解释、困惑时停下来 |
-| **Simplicity First** | 过度复杂化 | 不添加未被要求的功能、不创建单次使用的抽象 |
-| **Surgical Changes** | 范围蔓延 | 只修改必须修改的代码、匹配现有风格 |
-| **Goal-Driven Execution** | 模糊执行 | 将任务转化为可验证的目标、循环直到验证通过 |
-
-**效果**：减少不必要的 diff，减少因过度复杂化导致的重写，在实现前提出澄清问题。
-
-### 4. 双引擎架构
-
-| 引擎 | 模型 | 职责 |
-|------|------|------|
-| 推理引擎 | DeepSeek V4 Pro | 架构决策、复杂推理、规划 |
-| 执行引擎 | MiniMax M2.7 | 代码执行、多模态生成、创意突破 |
-| 低成本引擎 | DeepSeek V4 Flash | 代码搜索、文档查询、简单任务 |
-
-## 📚 文档说明
-
-- **[OhMyOpenCode 使用指南](docs/ohmyopencode-guide.md)**：完整的安装、配置和使用教程
-- **[Skill 必装合集](docs/ohmyopencode的skill必装合集.md)**：28 个 Skill 的分级推荐与场景化实战指南
 
 ## 🔧 配置说明
 
@@ -244,6 +247,71 @@ OhMyOpenAgent 多智能体配置，包含：
 - 11 个智能体定义（Sisyphus、Atlas、Oracle 等）
 - 14 种任务分类路由
 - **Sisyphus 强制委托规则**（本仓库核心优化）
+
+## 🎯 本配置的核心优化
+
+### 1. Compaction 上下文压缩
+
+```json
+"compaction": {
+  "auto": true,
+  "prune": true,
+  "tail_turns": 3,
+  "preserve_recent_tokens": 8000,
+  "reserved": 16000
+}
+```
+
+**效果**：长会话中自动压缩历史上下文，避免 token 无限膨胀。
+
+### 2. Sisyphus 强制委托纪律
+
+本配置在 Sisyphus 的 `prompt_append` 中加入了**强制委托规则**：
+
+- ❌ 读文件/搜索代码 → 必须用 explore agent（Flash）
+- ❌ 查文档/找库用法 → 必须用 librarian agent（Flash）
+- ❌ 写代码/改代码 → 必须用 task(category=...) 委托
+- ❌ 简单修复/typo → 必须用 task(category="quick") 委托
+
+**效果**：Sisyphus（Pro）只做编排决策，具体活让 Flash 和 M2.7 干，成本直降 50%+。
+
+### 3. Karpathy 四原则（全局执行宪法）
+
+借鉴 [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) 项目，引入 Andrej Karpathy 关于 LLM 编程陷阱的四大原则：
+
+| 原则 | 解决的问题 | 具体规则 |
+|------|-----------|---------|
+| **Think Before Coding** | 错误假设、隐藏困惑 | 明确声明假设、呈现多种解释、困惑时停下来 |
+| **Simplicity First** | 过度复杂化 | 不添加未被要求的功能、不创建单次使用的抽象 |
+| **Surgical Changes** | 范围蔓延 | 只修改必须修改的代码、匹配现有风格 |
+| **Goal-Driven Execution** | 模糊执行 | 将任务转化为可验证的目标、循环直到验证通过 |
+
+**效果**：减少不必要的 diff，减少因过度复杂化导致的重写，在实现前提出澄清问题。
+
+### 4. 双引擎架构
+
+| 引擎 | 模型 | 职责 |
+|------|------|------|
+| 推理引擎 | DeepSeek V4 Pro | 架构决策、复杂推理、规划 |
+| 执行引擎 | MiniMax M2.7 | 代码执行、多模态生成、创意突破 |
+| 低成本引擎 | DeepSeek V4 Flash | 代码搜索、文档查询、简单任务 |
+
+### 5. description / prompt_append 字段分工优化
+
+通过源码级分析确认了 OhMyOpenAgent 配置中各字段的实际注入路径：
+
+| 字段 | 注入位置 | 最佳用法 |
+|------|---------|---------|
+| `prompt_append` | Agent 自己的 System Prompt 末尾 | **操作边界约束**（能力速查表、委托规则、行为纪律） |
+| `description` | Sisyphus 的"可用子代理"菜单（截断到 120 字符） | **一行速查标识**（让 Sisyphus 快速判断派谁） |
+| `skills` | Agent 的 Skill 指令注入 | 控制加载哪些能力模块 |
+
+**优化措施**：
+- `description`：从 200-400 字精简到 30-105 字，不浪费被截断的部分
+- `prompt_append`：移除冗余的身份描述（官方硬编码已定义），专注于追加官方未覆盖的操作边界
+- 11 个 Agent + 16 个 Category 全部完成此优化
+
+**效果**：Sisyphus 菜单更清爽，Agent 提示词更精简，token 不浪费在重复的身份声明上。
 
 ## 🔧 MiniMax CLI 使用说明
 
@@ -301,6 +369,11 @@ mmx-cli login
 
 4. **重启 OpenCode 后配置才生效**。
 
+## 📚 文档说明
+
+- **[OhMyOpenCode 使用指南](docs/ohmyopencode-guide.md)**：完整的安装、配置和使用教程
+- **[Skill 必装合集](docs/ohmyopencode的skill必装合集.md)**：28 个 Skill 的分级推荐与场景化实战指南
+
 ## 📖 参考资源
 
 - [OhMyOpenAgent 官方仓库](https://github.com/code-yeongyu/oh-my-openagent)
@@ -310,6 +383,25 @@ mmx-cli login
 - [MiniMax Skills 仓库](https://github.com/MiniMax-AI/skills)
 
 ## 📝 更新日志
+
+### 2026-05-30
+- 🆕 新增 `eoc.js` 配置切换器（~1700 行）——方向键交互菜单 + 命令行双模式，install/switch 二合一
+  - 支持智能入口：首次引导安装，已安装进入切换菜单
+  - 支持项目级配置（`./.opencode/`）管理，全局/项目级双层级
+  - 全局命令设置：一键写入 `.bashrc`，任意目录 `eoc` 直达
+  - 自动备份：时间戳命名 + 去重 + 保留 10 份，支持回滚
+  - 模型 ID 指纹检测：3 层降级识别当前配置方案
+  - 模板切换内联填 ID：菜单内直输模型 ID，不再踢回命令行
+  - 备用屏幕缓冲区渲染，零重影
+  - CJK 显示宽度精准计算，中文边框完美对齐
+  - 零 npm 依赖，纯 Node.js 内置模块
+- 🆕 新增 Template2 双引擎配置（`oh-my-openagent-template2.json`）——仅需 Pro/Fast 两个模型 ID
+- 🔧 统一所有配置中 multimodal-looker 模型为 `opencode-go/mimo-v2.5`
+- 新增 4 个 `prompt` 覆盖版配置（`-prompt.json`），完全替换官方系统提示
+- 新增纯 MiniMax M2.7 配置 + 三层占位符模板配置
+- install.sh 增加模型引擎 4 选 1 + Prompt 注入模式 2 选 1
+- 优化 description/prompt_append 字段分工：description 精简到 <120 字符，prompt_append 专注操作边界约束
+- 修复 README 中过时的配置文件引用路径
 
 ### 2026-05-27
 - 初始版本
