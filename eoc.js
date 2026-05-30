@@ -1358,6 +1358,38 @@ async function checkAndInstallAgentBrowser() {
 }
 
 /**
+ * 快速检查关键插件是否已安装（只读不装）
+ * 每次 eoc 启动时运行，缺失时打印警告
+ */
+function checkPluginsQuick() {
+  // 仅在 TTY 环境显示
+  if (!process.stdin.isTTY) return;
+
+  const missing = [];
+
+  // 检查 EasyVision
+  try {
+    const r = execSync('npm list -g opencode-minimax-easy-vision', {
+      encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    if (!r.includes('opencode-minimax-easy-vision')) missing.push('EasyVision 图片拦截');
+  } catch { missing.push('EasyVision 图片拦截'); }
+
+  // 检查 agent-browser
+  try {
+    const r = execSync('npm list -g agent-browser', {
+      encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    if (!r.includes('agent-browser')) missing.push('agent-browser 浏览器自动化');
+  } catch { missing.push('agent-browser 浏览器自动化'); }
+
+  if (missing.length > 0) {
+    console.log(`\n${COLORS.yellow}⚠️  缺少关键插件: ${missing.join('、')}${COLORS.reset}`);
+    console.log(`${COLORS.dim}   💡 运行 eoc install 可自动安装${COLORS.reset}\n`);
+  }
+}
+
+/**
  * 打印安装摘要
  * @param {string} target - 配置目标级别
  * @param {string} engine
@@ -1721,6 +1753,12 @@ async function cmdRollbackMenu(target) {
  */
 async function main() {
   const args = parseArgs();
+  
+  // 每次执行都快速检查关键插件（install 命令除外，它有自己的完整检查流程）
+  if (args.command !== 'install') {
+    checkPluginsQuick();
+  }
+  
   const target = args.global ? 'global' : 'auto';
 
   // 处理显式命令
