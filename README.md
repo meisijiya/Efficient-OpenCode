@@ -256,31 +256,25 @@ OpenCode 主配置，包含：
 - `https://api.minimaxi.com`：国内版（默认）
 - `https://api.minimaxi.com`：国际版（如需）
 
-#### 🌐 Browser MCP（浏览器自动化）
+#### 🌐 agent-browser Skill（浏览器自动化）
 
-本配置已集成 `agent-browser` MCP，让 OpenCode 具备浏览器自动化能力（打开网页、截图、填表、点击等）。
+本仓库提供 `agent-browser` **Skill**（非 MCP），让 OpenCode 通过 CLI 命令驱动浏览器自动化。
 
 | 组件 | 说明 |
 |:---|:---|
-| **CLI** | `agent-browser`（Vercel Labs） |
-| **安装** | `npm install -g agent-browser`（`eoc install` 自动提示） |
-| **Chrome** | 自动下载或使用系统 Chrome |
-| **WSL2 用户** | 可能需要设置 `AGENT_BROWSER_EXECUTABLE_PATH` 环境变量 |
+| **工具** | `agent-browser`（Vercel Labs，Rust 原生 CLI） |
+| **安装** | `npm install -g agent-browser && agent-browser install` |
+| **加载** | OpenCode 中加载 `skills/agent-browser/SKILL.md` |
+| **原理** | AI 通过 `bash` 执行 `agent-browser <cmd>`，非 MCP 协议 |
 
-```json
-{
-  "browser": {
-    "type": "local",
-    "command": ["npx", "-y", "agent-browser"],
-    "enabled": true
-  }
-}
-```
+**核心能力**：打开网页、截图、填表、点击、JavaScript 注入、无障碍树快照（`@eN` 元素引用，200-400 token 极省）
 
-> ⚠️ **WSL2 注意**：Chrome 默认安装到 `~/.agent-browser/chrome-install/`，如无法自动检测，需手动设置环境变量：
+> ⚠️ **WSL2 注意**：Chrome 默认安装到 `~/.agent-browser/chrome-install/`，如无法自动检测：
 > ```bash
 > export AGENT_BROWSER_EXECUTABLE_PATH="~/.agent-browser/chrome-install/opt/google/chrome/google-chrome"
 > ```
+>
+> 📖 完整命令参考：`skills/agent-browser/SKILL.md` | [GitHub 仓库](https://github.com/vercel-labs/agent-browser)
 
 #### 其他配置
 

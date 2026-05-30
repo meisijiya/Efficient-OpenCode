@@ -1039,7 +1039,6 @@ async function cmdInstall(target, engine, promptMode) {
   // ---- 检查 EasyVision（仅全局） ----
   if (!isProject) {
     await checkAndInstallEasyVision();
-    await checkAndInstallAgentBrowser();
   }
 
   // ---- 摘要 ----
@@ -1279,85 +1278,6 @@ async function checkAndInstallEasyVision() {
 }
 
 /**
- * 检查并提示安装 agent-browser（浏览器自动化 MCP）
- * 仅全局安装时执行
- */
-async function checkAndInstallAgentBrowser() {
-  if (!process.stdin.isTTY) return;
-
-  // 检查 agent-browser 是否已全局安装
-  let installed = false;
-  try {
-    const r = execSync('npm list -g agent-browser', {
-      encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    if (r.includes('agent-browser')) installed = true;
-  } catch {}
-
-  if (!installed) {
-    const answer = await new Promise((resolve) => {
-      const rl = createReadline();
-      rl.question(`\n${c.info('🌐')} 安装 agent-browser 浏览器自动化 MCP？[Y/n]: `, (a) => {
-        rl.close();
-        resolve(a.trim().toLowerCase());
-      });
-    });
-
-    if (answer === '' || answer === 'y') {
-      console.log(`${c.info('⏳')} 正在安装 agent-browser…`);
-      try {
-        execSync('npm install -g agent-browser', { stdio: 'inherit' });
-        console.log(`${c.success('✅')} agent-browser 安装完成`);
-        installed = true;
-      } catch (err) {
-        console.log(`${c.warning('⚠')} agent-browser 安装失败，请手动安装: npm install -g agent-browser`);
-        return;
-      }
-    } else {
-      console.log(`${c.dim('ℹ')} 跳过 agent-browser 安装（可稍后手动安装）`);
-      return;
-    }
-  } else {
-    console.log(`${c.success('✅')} agent-browser 已安装`);
-  }
-
-  // 检测 Chrome 路径（WSL2 环境可能需要手动设置）
-  if (installed) {
-    const chromePaths = [
-      path.join(os.homedir(), '.agent-browser', 'chrome-install', 'opt', 'google', 'chrome', 'google-chrome'),
-      '/usr/bin/google-chrome',
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/chromium-browser',
-      '/usr/bin/chromium',
-    ];
-    let chromeFound = false;
-    for (const p of chromePaths) {
-      if (fs.existsSync(p)) {
-        chromeFound = true;
-        // 如果 Chrome 在 agent-browser 默认路径，设置环境变量
-        if (p.includes('.agent-browser')) {
-          const bashrcPath = path.join(os.homedir(), '.bashrc');
-          const envLine = `export AGENT_BROWSER_EXECUTABLE_PATH="${p}"`;
-          try {
-            const content = fs.readFileSync(bashrcPath, 'utf-8');
-            if (!content.includes('AGENT_BROWSER_EXECUTABLE_PATH')) {
-              fs.appendFileSync(bashrcPath, `\n# agent-browser Chrome 路径\n${envLine}\n`);
-              console.log(`${c.success('✅')} Chrome 路径已设置: ${p}`);
-              console.log(`${c.dim('   💡 运行 source ~/.bashrc 生效')}`);
-            }
-          } catch {}
-        }
-        break;
-      }
-    }
-    if (!chromeFound) {
-      console.log(`${c.warning('⚠')} 未检测到 Chrome，agent-browser 将自动下载`);
-      console.log(`${c.dim('   💡 WSL2 用户可能需要手动安装 Chrome 并设置 AGENT_BROWSER_EXECUTABLE_PATH')}`);
-    }
-  }
-}
-
-/**
  * 快速检查关键插件是否已安装（只读不装）
  * 每次 eoc 启动时运行，缺失时打印警告
  */
@@ -1374,14 +1294,6 @@ function checkPluginsQuick() {
     });
     if (!r.includes('opencode-minimax-easy-vision')) missing.push('EasyVision 图片拦截');
   } catch { missing.push('EasyVision 图片拦截'); }
-
-  // 检查 agent-browser
-  try {
-    const r = execSync('npm list -g agent-browser', {
-      encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    if (!r.includes('agent-browser')) missing.push('agent-browser 浏览器自动化');
-  } catch { missing.push('agent-browser 浏览器自动化'); }
 
   if (missing.length > 0) {
     console.log(`\n${COLORS.yellow}⚠️  缺少关键插件: ${missing.join('、')}${COLORS.reset}`);
