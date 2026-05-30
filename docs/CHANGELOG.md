@@ -26,6 +26,11 @@ All notable changes to Efficient-OpenCode will be documented in this file.
 
 - **纯 MiniMax M2.7 单引擎配置**
 
+- **浏览器自动化 MCP** (`agent-browser` by Vercel Labs)
+  - `configs/opencode.json` 新增 `browser` MCP 配置
+  - `eoc install` 自动检查并提示安装 `agent-browser` CLI
+  - WSL2 Chrome 路径自动检测 + `AGENT_BROWSER_EXECUTABLE_PATH` 自动配置
+
 ### 🔧 Changed
 
 - 所有 8 个配置文件中 multimodal-looker 模型统一为 `opencode-go/mimo-v2.5`

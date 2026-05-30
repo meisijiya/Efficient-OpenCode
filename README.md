@@ -256,6 +256,32 @@ OpenCode 主配置，包含：
 - `https://api.minimaxi.com`：国内版（默认）
 - `https://api.minimaxi.com`：国际版（如需）
 
+#### 🌐 Browser MCP（浏览器自动化）
+
+本配置已集成 `agent-browser` MCP，让 OpenCode 具备浏览器自动化能力（打开网页、截图、填表、点击等）。
+
+| 组件 | 说明 |
+|:---|:---|
+| **CLI** | `agent-browser`（Vercel Labs） |
+| **安装** | `npm install -g agent-browser`（`eoc install` 自动提示） |
+| **Chrome** | 自动下载或使用系统 Chrome |
+| **WSL2 用户** | 可能需要设置 `AGENT_BROWSER_EXECUTABLE_PATH` 环境变量 |
+
+```json
+{
+  "browser": {
+    "type": "local",
+    "command": ["npx", "-y", "agent-browser"],
+    "enabled": true
+  }
+}
+```
+
+> ⚠️ **WSL2 注意**：Chrome 默认安装到 `~/.agent-browser/chrome-install/`，如无法自动检测，需手动设置环境变量：
+> ```bash
+> export AGENT_BROWSER_EXECUTABLE_PATH="~/.agent-browser/chrome-install/opt/google/chrome/google-chrome"
+> ```
+
 #### 其他配置
 
 - `compaction`：上下文压缩配置（推荐保持默认）
