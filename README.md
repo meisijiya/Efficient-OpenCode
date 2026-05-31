@@ -2,7 +2,7 @@
 
 > 一键搭建高效 OpenCode + OhMyOpenAgent 多智能体编程环境
 
-本仓库提供 **`eoc.js` 配置切换器**——一键搭建、随时切换、自动备份的多引擎 OhMyOpenAgent 配置管理工具。支持 DeepSeek V4 / MiMo V2.5 / MiniMax M2.7 三引擎方案，集成 EasyVision 图片拦截、browser-automation 浏览器自动化及 19 个必装 Skill。
+本仓库提供 **`eoc.js` 配置切换器**——一键搭建、随时切换、自动备份的多引擎 OhMyOpenAgent 配置管理工具。支持 DeepSeek V4 / MiMo V2.5 / MiniMax M2.7 三引擎方案，集成 EasyVision 图片拦截、browser-automation 浏览器自动化及多项必装 Skill。
 
 ## ⚡ 快速开始
 
@@ -34,7 +34,7 @@ cd Efficient-OpenCode
 |:---|:---|
 | `./eoc` | 智能入口——首次自动引导安装，已安装则进入切换菜单 |
 | `./eoc install` | 安装/重装配置到 `~/.config/opencode/` |
-| `./eoc switch` | 🎮 方向键菜单切换配置方案（8选1，支持详情/回滚） |
+| `./eoc switch` | 🎮 方向键菜单切换配置方案（支持全部引擎+模板，含详情/回滚） |
 | `./eoc status` | 📊 查看当前激活的配置方案和模型分配详情 |
 | `./eoc rollback` | ⏪ 回滚到历史备份（自动保留最近10份） |
 | `./eoc skills` | 📦 一键安装 19 个推荐 Skill（自动跳过已装） |
@@ -46,7 +46,7 @@ cd Efficient-OpenCode
 - 💾 自动备份（时间戳命名，保留 10 个，自动去重）
 - 📦 零 npm 依赖——纯 Node.js 内置模块
 - 🧠 安装 vs 切换分离——依赖只装一次，后续秒切
-- 🎯 一键安装 19 个推荐 Skill（MiniMax + browser-automation + Superpowers）
+- 🎯 一键安装推荐 Skills（MiniMax + browser-automation + Superpowers）
 
 ### 方式二：传统 install.sh（保留兼容）
 
@@ -234,7 +234,7 @@ OhMyOpenAgent 支持两种自定义注入方式：
 | 低成本引擎 | DeepSeek V4 Flash | 代码搜索、文档查询、简单任务 |
 
 **配置文件**：
-- `opencode-deepseek.json`
+- `opencode.json`（所有方案通用）
 - `oh-my-openagent-deepseek.json`
 
 ## 🔌 连接方式

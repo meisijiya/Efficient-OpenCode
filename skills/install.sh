@@ -81,6 +81,13 @@ write_env_var() {
 # ---- 2. browser-automation Skill + CLI 工具 ----
 echo "🔧 [2/3] browser-automation (agent-browser + Playwright CLI)..."
 
+# 检查 npm 是否可用
+if ! command -v npm &>/dev/null; then
+    echo "  ⚠️  npm 未安装，请先安装 Node.js/npm 后再运行此脚本"
+    echo ""
+    # 跳过 CLI 安装，仅安装 Skill 文件
+else
+
 # 2a. 安装 browser-automation Skill
 mkdir -p "${AGENTS_DIR}/browser-automation"
 if is_installed "${AGENTS_DIR}" "browser-automation" && [ "$FORCE" != "--force" ]; then
@@ -197,6 +204,7 @@ if [ "$HAS_AGENT_BROWSER" = true ]; then
             echo "  ⏭️  跳过 Chrome 下载"
         fi
     fi
+fi
 fi
 echo ""
 

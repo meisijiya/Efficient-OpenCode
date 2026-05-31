@@ -782,8 +782,8 @@ function createMenu(items, defaultIndex, title, currentLabel, currentDesc) {
       process.stdout.write('\x1b[?25h'); // 显示光标
     }
 
-    // Ctrl+C 恢复屏幕后退出
-    process.on('SIGINT', () => {
+    // Ctrl+C 恢复屏幕后退出（once 避免重复注册导致泄漏）
+    process.once('SIGINT', () => {
       cleanup();
       process.exit(0);
     });
@@ -890,12 +890,12 @@ async function cmdInstall(target, engine, promptMode) {
     let opencodeFound = false;
     let opencodeVersion = '';
     try {
-      opencodeVersion = execSync('opencode --version', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+      opencodeVersion = execSync('opencode --version', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 10000 }).toString().trim();
       console.log(`  ${c.success('✅')} OpenCode: ${opencodeVersion}`);
       opencodeFound = true;
     } catch {
       try {
-        const which = execSync('which opencode', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+        const which = execSync('which opencode', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5000 }).toString().trim();
         console.log(`  ${c.warning('⚠')} OpenCode 已安装但版本检测失败 (${which})`);
         opencodeFound = true;
       } catch {}
@@ -908,7 +908,7 @@ async function cmdInstall(target, engine, promptMode) {
 
     // Node.js
     try {
-      const v = execSync('node --version', { encoding: 'utf-8' }).trim();
+      const v = execSync('node --version', { encoding: 'utf-8', timeout: 5000 }).trim();
       console.log(`  ${c.success('✅')} Node.js: ${v}`);
     } catch {
       console.log(`  ${c.warning('⚠')} Node.js 未检测到，脚本功能可能受限`);
@@ -1327,7 +1327,7 @@ async function checkAndInstallEasyVision() {
       let success = false;
       // 方式一：opencode plugin 命令（官方推荐）
       try {
-        execSync('opencode plugin opencode-minimax-easy-vision --global', { stdio: 'inherit' });
+        execSync('opencode plugin opencode-minimax-easy-vision --global', { stdio: 'inherit', timeout: 60000 });
         success = true;
       } catch {}
       // 方式二：git clone 到插件目录（备用）
@@ -1335,7 +1335,7 @@ async function checkAndInstallEasyVision() {
         try {
           const pluginDir = path.join(os.homedir(), '.config', 'opencode', 'plugins');
           fs.mkdirSync(pluginDir, { recursive: true });
-          execSync(`git clone https://github.com/devadathanmb/opencode-minimax-easy-vision.git "${evPluginDir}"`, { stdio: 'inherit' });
+          execSync(`git clone https://github.com/devadathanmb/opencode-minimax-easy-vision.git "${evPluginDir}"`, { stdio: 'inherit', timeout: 120000 });
           success = true;
         } catch {}
       }
@@ -1368,7 +1368,7 @@ function checkPluginsQuick() {
   if (!evFound) {
     try {
       const r = execSync('npm list -g opencode-minimax-easy-vision', {
-        encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'],
+        encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'], timeout: 30000,
       });
       if (r.includes('opencode-minimax-easy-vision')) evFound = true;
     } catch {}
@@ -1778,7 +1778,7 @@ function cmdSkills() {
     return;
   }
   try {
-    execSync(`bash "${scriptPath}"`, { stdio: 'inherit' });
+    execSync(`bash "${scriptPath}"`, { stdio: 'inherit', timeout: 300000 });
   } catch (err) {
     console.log(`${c.error('❌')} Skills 安装失败: ${err.message}`);
   }

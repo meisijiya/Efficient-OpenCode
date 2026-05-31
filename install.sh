@@ -6,6 +6,9 @@
 
 set -e
 
+# 切换到脚本所在目录（支持从任意路径执行）
+cd "$(dirname "$0")"
+
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -195,14 +198,19 @@ configure_template() {
 
     print_info "正在生成配置..."
 
-    sed -e "s|__PRO_MODEL__|${PRO_MODEL}|g" \
-        -e "s|__FAST_MODEL__|${FAST_MODEL}|g" \
-        -e "s|__EXEC_MODEL__|${EXEC_MODEL}|g" \
-        -e "s|__FALLBACK_MODEL__|${FALLBACK_MODEL}|g" \
-        "$template_file" > "$temp_file"
+    # 用 Python 替代 sed 避免分隔符冲突（如模型 ID 含 | & / 等特殊字符）
+    python3 -c "
+import sys, json
+with open(sys.argv[1]) as f: content = f.read()
+content = content.replace('__PRO_MODEL__', sys.argv[2])
+content = content.replace('__FAST_MODEL__', sys.argv[3])
+content = content.replace('__EXEC_MODEL__', sys.argv[4])
+content = content.replace('__FALLBACK_MODEL__', sys.argv[5])
+json.loads(content)
+with open(sys.argv[6], 'w') as f: f.write(content)
+" "$template_file" "$PRO_MODEL" "$FAST_MODEL" "$EXEC_MODEL" "$FALLBACK_MODEL" "$temp_file"
 
-    # 验证生成的是合法 JSON
-    if ! python3 -m json.tool "$temp_file" > /dev/null 2>&1; then
+    if [ $? -ne 0 ]; then
         print_error "生成的配置 JSON 不合法，请检查模型 ID 是否包含特殊字符"
         rm -f "$temp_file"
         exit 1
@@ -361,9 +369,17 @@ install_easyvision() {
         print_success "EasyVision 插件已安装"
     else
         print_info "安装 EasyVision 插件..."
-        opencode plugin opencode-minimax-easy-vision --global 2>/dev/null || \
-            git clone https://github.com/devadathanmb/opencode-minimax-easy-vision.git "$HOME/.config/opencode/plugins/opencode-minimax-easy-vision" 2>/dev/null
-        print_success "EasyVision 插件安装完成"
+        local ev_installed=false
+        if opencode plugin opencode-minimax-easy-vision --global 2>/dev/null; then
+            ev_installed=true
+        elif git clone https://github.com/devadathanmb/opencode-minimax-easy-vision.git "$HOME/.config/opencode/plugins/opencode-minimax-easy-vision" 2>/dev/null; then
+            ev_installed=true
+        fi
+        if [ "$ev_installed" = true ]; then
+            print_success "EasyVision 插件安装完成"
+        else
+            print_warning "EasyVision 安装失败，请手动安装: opencode plugin opencode-minimax-easy-vision --global"
+        fi
     fi
 }
 
@@ -394,6 +410,9 @@ print_summary() {
 
 # 主函数
 main() {
+    # 清理临时文件（退出/Ctrl+C/终止时自动执行）
+    trap 'rm -f /tmp/oh-my-openagent-template-*.json /tmp/ohmyopencode-solofast-*.json 2>/dev/null' EXIT INT TERM
+
     echo ""
     echo "=========================================="
     echo -e "${BLUE}Efficient OpenCode 一键安装${NC}"
@@ -408,7 +427,7 @@ main() {
     install_ohmyopenagent
     install_minimax_mcp
     install_easyvision
-    show_summary
+    print_summary
 }
 
 # 运行主函数（支持 --mimo / --deepseek 参数跳过交互选择）
