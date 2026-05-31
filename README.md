@@ -2,7 +2,7 @@
 
 > 一键搭建高效 OpenCode + OhMyOpenAgent 多智能体编程环境
 
-本仓库提供 **`eoc.js` 配置切换器**——一键搭建、随时切换、自动备份的多引擎 OhMyOpenAgent 配置管理工具。支持 DeepSeek V4 / MiMo V2.5 / MiniMax M2.7 三引擎方案，集成 EasyVision 图片拦截、agent-browser 浏览器自动化及 19 个必装 Skill。
+本仓库提供 **`eoc.js` 配置切换器**——一键搭建、随时切换、自动备份的多引擎 OhMyOpenAgent 配置管理工具。支持 DeepSeek V4 / MiMo V2.5 / MiniMax M2.7 三引擎方案，集成 EasyVision 图片拦截、browser-automation 浏览器自动化及 19 个必装 Skill。
 
 ## ⚡ 快速开始
 
@@ -46,7 +46,7 @@ cd Efficient-OpenCode
 - 💾 自动备份（时间戳命名，保留 10 个，自动去重）
 - 📦 零 npm 依赖——纯 Node.js 内置模块
 - 🧠 安装 vs 切换分离——依赖只装一次，后续秒切
-- 🎯 一键安装 19 个推荐 Skill（MiniMax + agent-browser + Superpowers）
+- 🎯 一键安装 19 个推荐 Skill（MiniMax + browser-automation + Superpowers）
 
 ### 方式二：传统 install.sh（保留兼容）
 
@@ -280,25 +280,24 @@ OpenCode 主配置，包含：
 - `https://api.minimaxi.com`：国内版（默认）
 - `https://api.minimaxi.com`：国际版（如需）
 
-#### 🌐 agent-browser Skill（浏览器自动化）
+#### 🌐 browser-automation Skill（浏览器自动化）
 
-本仓库提供 `agent-browser` **Skill**（非 MCP），让 OpenCode 通过 CLI 命令驱动浏览器自动化。
+本仓库提供 `browser-automation` **Skill**——合并 agent-browser CLI + Playwright CLI 的统一浏览器自动化方案。
 
 | 组件 | 说明 |
 |:---|:---|
-| **工具** | `agent-browser`（Vercel Labs，Rust 原生 CLI） |
-| **安装** | `npm install -g agent-browser && agent-browser install` |
-| **加载** | OpenCode 中加载 `skills/agent-browser/SKILL.md` |
-| **原理** | AI 通过 `bash` 执行 `agent-browser <cmd>`，非 MCP 协议 |
+| **工具** | `agent-browser`（Vercel Labs，Rust 原生）+ `playwright` CLI（Microsoft） |
+| **安装** | `npm install -g agent-browser && npm install -g playwright && playwright install chromium` |
+| **加载** | OpenCode 中加载 `browser-automation` Skill（自动加载到 `~/.agents/skills/`） |
+| **原理** | 决策树选工具：agent-browser（@eN 快照，极省 token）| playwright CLI（单次截图/PDF） |
+| **共享浏览器** | agent-browser 自动复用 Playwright 的 Chromium（`~/.cache/ms-playwright/`），无需重复下载 |
 
-**核心能力**：打开网页、截图、填表、点击、JavaScript 注入、无障碍树快照（`@eN` 元素引用，200-400 token 极省）
-
-> ⚠️ **WSL2 注意**：Chrome 默认安装到 `~/.agent-browser/chrome-install/`，如无法自动检测：
+> ⚠️ **WSL2 注意**：Chromium 统一由 Playwright 管理，agent-browser 通过 `AGENT_BROWSER_EXECUTABLE_PATH` 环境变量指向同一浏览器。
 > ```bash
-> export AGENT_BROWSER_EXECUTABLE_PATH="~/.agent-browser/chrome-install/opt/google/chrome/google-chrome"
+> export AGENT_BROWSER_EXECUTABLE_PATH="~/.cache/ms-playwright/chromium-*/chrome-linux/chrome"
 > ```
 >
-> 📖 完整命令参考：`skills/agent-browser/SKILL.md` | [GitHub 仓库](https://github.com/vercel-labs/agent-browser)
+> 📖 完整命令参考：`skills/browser-automation/SKILL.md` | [agent-browser](https://github.com/vercel-labs/agent-browser) | [playwright](https://playwright.dev)
 
 #### 其他配置
 
