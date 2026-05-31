@@ -470,6 +470,22 @@ mmx-cli login
 - 优化 description/prompt_append 字段分工：description 精简到 <120 字符，prompt_append 专注操作边界约束
 - 修复 README 中过时的配置文件引用路径
 
+### 2026-05-31
+- 🆕 新增 `browser-automation` Skill——合并 agent-browser CLI + Playwright CLI 的统一浏览器自动化方案
+  - 决策树选工具：agent-browser（@eN 快照，极省 token）| playwright CLI（单次截图/PDF）
+  - 共享 Chromium：agent-browser 自动复用 Playwright 的 Chromium（`~/.cache/ms-playwright/`），省 ~300MB 磁盘
+  - `skills/install.sh` 新增 Playwright CLI + Chromium 安装流程
+- 🔧 统一模板/预设版本中的提示词模型名引用
+  - 预设版（deepseek/mimo/minimax）：prompt 中模型名与实际一致
+  - 模板版（template/template2/solofast）：全部模型名→泛型描述（推理模型/轻量模型）
+  - 修复 minimax 预设中残留的 DeepSeek 引用、mimo 预设中 ultrabrain 描述
+- 🔧 全项目审查修复（P0-P3 共 11 项）
+  - P0: install.sh 函数名崩溃修复（show_summary→print_summary）+ EasyVision 错误静默吞修复
+  - P1: configure_template() sed 注入→Python + createMenu() SIGINT 泄漏修复
+  - P2: README 数字过时更新 + 脚本位置无关化 + 孤立文件清理
+  - P3: execSync 超时防护 + trap 临时文件清理
+- 🔧 修复 eoc.js solofast 安装文件名不匹配（getSourceFile 返回错误路径）
+
 ### 2026-05-27
 - 初始版本
 - 添加 compaction 上下文压缩配置
